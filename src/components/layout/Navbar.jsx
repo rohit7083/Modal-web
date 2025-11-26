@@ -1,0 +1,314 @@
+// src/components/NavbarRJ.jsx
+import React, { useState } from "react";
+import Logo from "./../../assets/logo/Drake-Logo.png";
+import SignUp from "../../../src/pages/signUp/index";
+import Login from "../../../src/pages/login/Login";
+
+const NavbarRJ = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null);
+
+  // NEW: modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // which form to show in modal -> signup / login
+  const [showLogin, setShowLogin] = useState(false);
+
+  const toggleDropdown = (name) => {
+    setOpenDropdown(openDropdown === name ? null : name);
+  };
+
+  return (
+    <>
+      <header className="fixed top-0 left-0 right-0 z-[1050]">
+        <nav className="bg-white shadow-sm py-3">
+          <div className="container mx-auto px-4 flex items-center justify-between flex-wrap lg:flex-nowrap">
+
+            {/* Left: Logo */}
+            <a href="/" className="flex items-center no-underline">
+              <div>
+                <img
+                  src={Logo}
+                  alt="Drake Online"
+                  className="h-[80px] w-auto"
+                />
+              </div>
+              <span className="text-[0.85rem] font-bold tracking-[0.12em] uppercase text-gray-800">
+                Drake Online
+              </span>
+            </a>
+
+            {/* Mobile toggle button */}
+            <button
+              type="button"
+              className="lg:hidden p-2 border border-gray-300 rounded !bg-white hover:bg-gray-100 focus:outline-none"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle navigation"
+            >
+              <svg
+                className="w-6 h-6 text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d={
+                    isOpen
+                      ? "M6 18L18 6M6 6l12 12"
+                      : "M4 6h16M4 12h16M4 18h16"
+                  }
+                />
+              </svg>
+            </button>
+
+            {/* Center: Menu items */}
+            <div
+              className={`${
+                isOpen ? "block" : "hidden"
+              } w-full lg:flex lg:w-auto lg:justify-center lg:flex-1`}
+            >
+              <ul className="flex flex-col lg:flex-row lg:items-center lg:space-x-1 mt-4 lg:mt-0 list-none p-0 m-0">
+
+                {/* HOME */}
+                <li>
+                  <a
+                    href="/"
+                    className="block text-[0.85rem] font-medium tracking-[0.12em] uppercase px-[0.9rem] py-2 no-underline text-black hover:text-primary"
+                  >
+                    HOME
+                  </a>
+                </li>
+
+                {/* Models Dropdown */}
+                <li className="relative">
+                  <button
+                    type="button"
+                    onClick={() => toggleDropdown("models")}
+                    className="w-full lg:w-auto flex items-center text-[0.85rem] font-medium tracking-[0.12em] uppercase px-[0.9rem] py-2 cursor-pointer !bg-transparent !border-none text-black hover:text-primary"
+                  >
+                    MODELS
+                    <svg
+                      className="w-3 h-3 ml-1 inline-block"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+                  {openDropdown === "models" && (
+                    <ul className="lg:absolute lg:top-full lg:left-0 bg-white lg:shadow-lg lg:rounded lg:min-w-[160px] lg:mt-1 pl-4 lg:pl-0 list-none m-0 p-0 lg:border lg:border-gray-200">
+                      <li>
+                        <a
+                          className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
+                          href="#"
+                        >
+                          Male Models
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
+                          href="#"
+                        >
+                          Female Models
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
+                          href="#"
+                        >
+                          Kids
+                        </a>
+                      </li>
+                    </ul>
+                  )}
+                </li>
+
+                {/* Talents Dropdown */}
+                <li className="relative">
+                  <button
+                    type="button"
+                    onClick={() => toggleDropdown("talents")}
+                    className="w-full lg:w-auto flex items-center text-[0.85rem] font-medium tracking-[0.12em] uppercase px-[0.9rem] py-2 cursor-pointer !bg-transparent !border-none text-black hover:text-primary"
+                  >
+                    TALENTS
+                    <svg
+                      className="w-3 h-3 ml-1 inline-block"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+                  {openDropdown === "talents" && (
+                    <ul className="lg:absolute lg:top-full lg:left-0 bg-white lg:shadow-lg lg:rounded lg:min-w-[160px] lg:mt-1 pl-4 lg:pl-0 list-none m-0 p-0 lg:border lg:border-gray-200">
+                      <li>
+                        <a
+                          className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
+                          href="#"
+                        >
+                          Actors
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
+                          href="#"
+                        >
+                          Influencers
+                        </a>
+                      </li>
+                    </ul>
+                  )}
+                </li>
+
+                {/* Contact Dropdown */}
+                <li className="relative">
+                  <button
+                    type="button"
+                    onClick={() => toggleDropdown("contact")}
+                    className="w-full lg:w-auto flex items-center text-[0.85rem] font-medium tracking-[0.12em] uppercase px-[0.9rem] py-2 cursor-pointer !bg-transparent !border-none text-black hover:text-primary"
+                  >
+                    CONTACT
+                    <svg
+                      className="w-3 h-3 ml-1 inline-block"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+                  {openDropdown === "contact" && (
+                    <ul className="lg:absolute lg:top-full lg:left-0 bg-white lg:shadow-lg lg:rounded lg:min-w-[160px] lg:mt-1 pl-4 lg:pl-0 list-none m-0 p-0 lg:border lg:border-gray-200">
+                      <li>
+                        <a
+                          className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
+                          href="#"
+                        >
+                          Contact Form
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
+                          href="#"
+                        >
+                          Location
+                        </a>
+                      </li>
+                    </ul>
+                  )}
+                </li>
+
+              </ul>
+            </div>
+
+            {/* RIGHT: Sign up button */}
+            <button
+              className="btn-drake-outline mt-3 lg:mt-0"
+              onClick={() => {
+                setShowLogin(false); 
+                setIsModalOpen(true);
+              }}
+            >
+              Sign up
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      {/* MODAL OVERLAY */}
+      <div
+        className={`
+          fixed inset-0 z-[1100] 
+          flex items-center justify-center 
+          bg-black/30 backdrop-blur-sm
+          transition-opacity duration-300
+          ${isModalOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
+        `}
+        onClick={() => {
+          setIsModalOpen(false);
+          setShowLogin(false);
+        }}
+      >
+        {/* Modal box */}
+        <div
+          className={`
+            bg-white rounded-xl shadow-lg px-8 py-6 
+            w-full max-w-[720px] max-h-[90vh] overflow-y-auto
+            transform transition-transform duration-300
+            ${isModalOpen ? "scale-100 translate-y-0" : "scale-95 -translate-y-2"}
+          `}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Close button */}
+          <div className="flex justify-end">
+            <button
+              className="text-gray-500 hover:text-black text-xl leading-none"
+              onClick={() => {
+                setIsModalOpen(false);
+                setShowLogin(false);
+              }}
+            >
+              ×
+            </button>
+          </div>
+
+          {/* Modal content */}
+          <div className="mt-2">
+            {showLogin ? <Login /> : <SignUp />}
+
+            {/* UPDATED CONDITIONAL TEXT */}
+            {showLogin ? (
+              <p className="mt-2 text-center flex justify-center items-center">
+                <span>Don&apos;t have an account?</span>
+                <button
+                  type="button"
+                  className="ml-1 font-bold text-primary underline-offset-2 hover:underline cursor-pointer"
+                  onClick={() => setShowLogin(false)}
+                >
+                  Create new account
+                </button>
+              </p>
+            ) : (
+              <p className="mt-2 text-center flex justify-center items-center">
+                <span>Already have an account?</span>
+                <button
+                  type="button"
+                  className="ml-1 font-bold text-primary underline-offset-2 hover:underline cursor-pointer"
+                  onClick={() => setShowLogin(true)}
+                >
+                  Login
+                </button>
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default NavbarRJ;
