@@ -64,9 +64,11 @@ const LatestWork = () => {
        
         <div className="max-w-6xl mx-auto px-4">
           {/* Title */}
-          <h2 className="text-center text-3xl md:text-4xl font-semibold tracking-[0.25em] mb-10 text-primary">
+         
+          <h2 className="mb-10 text-3xl md:text-4xl font-serif tracking-[0.35em] text-pink-500 uppercase text-center">
             LATEST
           </h2>
+
 
           {/* Carousel */}
           <div className="flex items-center justify-center gap-4 md:gap-8">

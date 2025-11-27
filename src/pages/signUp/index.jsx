@@ -1,4 +1,11 @@
-import React, { useState } from "react";
+// src/pages/signUp/Index.jsx
+import React, { useState, useEffect } from "react";
+import useJwt from "./../../endpoints/jwt/useJwt";
+import sodium from "libsodium-wrappers";
+
+// ✅ Static public key (server se mila hua) - BASE64
+// same key jo tum login me use kar rahe ho
+const PUBLIC_KEY_BASE64 = "P7FnNMp37TGfrU3Jkwitp2ESsSWIMIegHby/GybleDE=";
 
 const countryOptions = [
   { code: "+91", label: "India", flag: "🇮🇳" },
@@ -7,6 +14,33 @@ const countryOptions = [
   { code: "+61", label: "Australia", flag: "🇦🇺" },
   { code: "+971", label: "UAE", flag: "🇦🇪" },
 ];
+
+// ✅ Helper: password ko login jaisa hi encrypt karo (crypto_box_seal)
+const encryptPassword = async (password, sodiumReady) => {
+  if (!sodiumReady) {
+    throw new Error("Crypto library not ready");
+  }
+
+  // public key ko base64 se bytes me convert
+  const publicKeyBytes = sodium.from_base64(
+    PUBLIC_KEY_BASE64,
+    sodium.base64_variants.ORIGINAL
+  );
+
+  // password ko bytes me convert
+  const messageBytes = sodium.from_string(password);
+
+  // seal box encryption (sirf server private key se decrypt hoga)
+  const cipherBytes = sodium.crypto_box_seal(messageBytes, publicKeyBytes);
+
+  // cipher ko base64 me convert karke bhejenge
+  const encrypted = sodium.to_base64(
+    cipherBytes,
+    sodium.base64_variants.ORIGINAL
+  );
+
+  return encrypted;
+};
 
 function Index() {
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -24,6 +58,15 @@ function Index() {
   });
 
   const [errors, setErrors] = useState({});
+  const [sodiumReady, setSodiumReady] = useState(false);
+
+  // ✅ libsodium ready hone ka wait
+  useEffect(() => {
+    (async () => {
+      await sodium.ready;
+      setSodiumReady(true);
+    })();
+  }, []);
 
   const toggleDropdown = (name) => {
     setOpenDropdown(openDropdown === name ? null : name);
@@ -115,7 +158,6 @@ function Index() {
   };
 
   const handlePasswordChange = (e) => {
-    
     const value = e.target.value;
     setFormData((prev) => ({ ...prev, password: value }));
 
@@ -130,7 +172,6 @@ function Index() {
   };
 
   const handleConfirmPasswordChange = (e) => {
-   
     const value = e.target.value;
     setFormData((prev) => ({ ...prev, confirmPassword: value }));
 
@@ -144,7 +185,7 @@ function Index() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const newErrors = {};
@@ -185,7 +226,8 @@ function Index() {
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = "Confirm Password is required.";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Password and Confirm Password do not match.";
+      newErrors.confirmPassword =
+        "Password and Confirm Password do not match.";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -193,27 +235,77 @@ function Index() {
       return;
     }
 
-    console.log("Form submitted with data:", {
-      ...formData,
-      userType: selectedUserType,
-      countryCode: selectedCountry.code,
-    });
-    alert("Form submitted successfully!");
+    // ✅ libsodium ready check (same as login)
+    if (!sodiumReady) {
+      alert(
+        "Please wait, security library is loading. Try again in a moment."
+      );
+      return;
+    }
 
-    // 🔹 ADDED: reset all fields after success (no old code deleted)
-    setFormData({
-      firstName: "",
-      lastName: "",
-      dob: "",
-      email: "",
-      phone: "",
-      password: "",
-      confirmPassword: "",
-    });
-    setSelectedUserType("User Type");
-    setSelectedCountry(countryOptions[0]);
-    setErrors({});
-    SetSubmitButton("Create Account");
+    // 🔐 Encrypt password login jaisa hi, but sirf ek baar
+    let encryptedPassword;
+    let encryptedConfirmPassword;
+
+    try {
+      // 👉 seal-box se encrypt kar rahe hain
+      encryptedPassword = await encryptPassword(
+        formData.password,
+        sodiumReady
+      );
+
+      // 👉 confirm_password ke liye same encrypted token reuse
+      encryptedConfirmPassword = encryptedPassword;
+    } catch (encErr) {
+      console.error("Password encryption failed:", encErr);
+      alert("Something went wrong while encrypting password.");
+      return;
+    }
+
+    // map user type to number as per backend
+    const userTypeMap = {
+      Model: 1,
+      "Casting Company": 2,
+    };
+
+    // ✅ payload: encrypted password & same encrypted confirm_password
+    const payload = {
+      first_name: formData.firstName.trim(),
+      last_name: formData.lastName.trim(),
+      dob: formData.dob,
+      email: formData.email.trim(),
+      country_code: selectedCountry.code,
+      phone: formData.phone,
+      password: encryptedPassword,
+      confirm_password: encryptedConfirmPassword,
+      user_type: userTypeMap[selectedUserType] || 0,
+    };
+
+    console.log("SIGNUP PAYLOAD (JSON):", payload);
+
+    try {
+      SetSubmitButton("Creating...");
+      const response = await useJwt.signup(payload);
+      console.log("Signup response:", response);
+      alert("Form submitted successfully!");
+    } catch (err) {
+      console.error("Signup error:", err);
+      alert("Something went wrong while creating account.");
+    } finally {
+      setFormData({
+        firstName: "",
+        lastName: "",
+        dob: "",
+        email: "",
+        phone: "",
+        password: "",
+        confirmPassword: "",
+      });
+      setSelectedUserType("User Type");
+      setSelectedCountry(countryOptions[0]);
+      setErrors({});
+      SetSubmitButton("Create Account");
+    }
   };
 
   const today = new Date().toISOString().split("T")[0];
@@ -259,7 +351,9 @@ function Index() {
             <li>
               <button
                 type="button"
-                onClick={() => handleUserTypeSelect("Casting Company")}
+                onClick={() =>
+                  handleUserTypeSelect("Casting Company")
+                }
                 className="w-full text-left block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5]"
               >
                 Casting Company

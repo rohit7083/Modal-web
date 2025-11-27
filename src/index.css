@@ -12,6 +12,7 @@
   --color-primary: rgb(255, 0, 128);
 }
 
+/* Custom primary utilities */
 @utility text-primary {
   color: var(--color-primary);
 }
@@ -32,7 +33,7 @@ body {
   color: #000000;
 }
 
-/* 🔹 All links default BLACK (no blue / visited) */
+/* 🔹 All links default BLACK */
 a,
 a:link,
 a:visited,
@@ -47,15 +48,12 @@ a:hover {
   color: rgb(255, 0, 128);
 }
 
-/* 🔹 Default Buttons: Black (EXISTING – not touched) */
+/* 🔹 Default Buttons: Black (existing) */
 button {
   border-radius: 0.5rem;
-  /* border: 1px solid transparent; */
-
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-  /* background-color: #000000; */
   color: #090404;
   cursor: pointer;
   transition: all 150ms ease;
@@ -63,16 +61,15 @@ button {
 
 button:focus {
   outline: none;
-  /* box-shadow: 0 0 0 2px #00000033, 0 0 0 4px #000000; */
 }
 
 button:hover {
-  color: rgb(255, 0, 128); /* text pink */
+  color: rgb(255, 0, 128);
 }
 
 /* ===================================================== */
-/* ✅ NEW UNIQUE BUTTON STYLE (video jaisa outline button) */
-/* Use: <button className="btn-drake-outline">Sign up</button> */
+/* ✅ NEW UNIQUE BUTTON STYLE */
+/* Use: <button className="btn-drake-outline">Signup</button> */
 /* ===================================================== */
 
 .btn-drake-outline {
@@ -80,11 +77,11 @@ button:hover {
   align-items: center;
   justify-content: center;
 
-  padding: 0.75rem 2.5rem;        /* approx same as video */
+  padding: 0.75rem 2.5rem;
   font-size: 1rem;
   font-weight: 500;
 
-  border-radius: 0.75rem;         /* more rounded corners */
+  border-radius: 0.75rem;
   border: 2px solid rgb(255, 0, 128);
   background-color: transparent;
   color: #000000;
@@ -103,4 +100,15 @@ button:hover {
 
 .btn-drake-outline:active {
   transform: scale(0.98);
+}
+
+/* ===================================================== */
+/* ✅ GLOBAL HEADING STYLE (Your Request) */
+/* Use anywhere: <h2 className="heading-main">TEXT</h2> */
+/* ===================================================== */
+
+@layer utilities {
+  .heading-main {
+    @apply text-3xl md:text-4xl font-serif tracking-[0.35em] text-pink-500 uppercase;
+  }
 }

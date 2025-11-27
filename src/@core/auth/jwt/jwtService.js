@@ -123,7 +123,7 @@ export default class JwtService {
   /*
   *     User Services
   */
-  register(...args) {
+  signup(...args) {
     console.log('Calling register API');
     return axios.post(this.jwtConfig.registerEndpoint, ...args)
   }

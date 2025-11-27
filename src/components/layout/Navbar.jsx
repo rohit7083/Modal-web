@@ -1,5 +1,6 @@
 // src/components/NavbarRJ.jsx
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import Logo from "./../../assets/logo/Drake-Logo.png";
 import SignUp from "../../../src/pages/signUp/index";
 import Login from "../../../src/pages/login/Login";
@@ -8,14 +9,23 @@ const NavbarRJ = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
 
-  // NEW: modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // which form to show in modal -> signup / login
   const [showLogin, setShowLogin] = useState(false);
 
   const toggleDropdown = (name) => {
     setOpenDropdown(openDropdown === name ? null : name);
+  };
+
+  // ✅ Common handler: jab bhi koi menu item click ho, sab band + scroll to top
+  const handleNavItemClick = () => {
+    setIsOpen(false);
+    setOpenDropdown(null);
+
+    // ✅ Scroll to top (smooth)
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   return (
@@ -23,9 +33,12 @@ const NavbarRJ = () => {
       <header className="fixed top-0 left-0 right-0 z-[1050]">
         <nav className="bg-white shadow-sm py-3">
           <div className="container mx-auto px-4 flex items-center justify-between flex-wrap lg:flex-nowrap">
-
             {/* Left: Logo */}
-            <a href="/" className="flex items-center no-underline">
+            <Link
+              to="/"
+              className="flex items-center no-underline"
+              onClick={handleNavItemClick}
+            >
               <div>
                 <img
                   src={Logo}
@@ -36,7 +49,7 @@ const NavbarRJ = () => {
               <span className="text-[0.85rem] font-bold tracking-[0.12em] uppercase text-gray-800">
                 Drake Online
               </span>
-            </a>
+            </Link>
 
             {/* Mobile toggle button */}
             <button
@@ -71,15 +84,15 @@ const NavbarRJ = () => {
               } w-full lg:flex lg:w-auto lg:justify-center lg:flex-1`}
             >
               <ul className="flex flex-col lg:flex-row lg:items-center lg:space-x-1 mt-4 lg:mt-0 list-none p-0 m-0">
-
                 {/* HOME */}
                 <li>
-                  <a
-                    href="/"
+                  <Link
+                    to="/"
+                    onClick={handleNavItemClick}
                     className="block text-[0.85rem] font-medium tracking-[0.12em] uppercase px-[0.9rem] py-2 no-underline text-black hover:text-primary"
                   >
                     HOME
-                  </a>
+                  </Link>
                 </li>
 
                 {/* Models Dropdown */}
@@ -107,41 +120,54 @@ const NavbarRJ = () => {
                   {openDropdown === "models" && (
                     <ul className="lg:absolute lg:top-full lg:left-0 bg-white lg:shadow-lg lg:rounded lg:min-w-[160px] lg:mt-1 pl-4 lg:pl-0 list-none m-0 p-0 lg:border lg:border-gray-200">
                       <li>
-                        <a
+                        <Link
                           className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
-                          href="#"
+                          to="/modals/men"
+                          onClick={handleNavItemClick} // ✅ close + scroll
                         >
                           Male Models
-                        </a>
+                        </Link>
                       </li>
                       <li>
-                        <a
+                        <Link
                           className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
-                          href="#"
+                          to="/modals/women"
+                          onClick={handleNavItemClick}
                         >
                           Female Models
-                        </a>
+                        </Link>
                       </li>
                       <li>
-                        <a
+                        <Link
                           className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
-                          href="#"
+                          to="/modals/kids"
+                          onClick={handleNavItemClick}
                         >
                           Kids
-                        </a>
+                        </Link>
                       </li>
                     </ul>
                   )}
                 </li>
 
-                {/* Talents Dropdown */}
+                <li>
+                  <Link
+                    to="/about-us"
+                    onClick={handleNavItemClick}
+                    className="block text-[0.85rem] font-medium tracking-[0.12em] uppercase px-[0.9rem] py-2 no-underline text-black hover:text-primary"
+                  >
+                    About Us
+                  </Link>
+                </li>
+
+                {/* Services Dropdown */}
                 <li className="relative">
                   <button
                     type="button"
                     onClick={() => toggleDropdown("talents")}
                     className="w-full lg:w-auto flex items-center text-[0.85rem] font-medium tracking-[0.12em] uppercase px-[0.9rem] py-2 cursor-pointer !bg-transparent !border-none text-black hover:text-primary"
                   >
-                    TALENTS
+                    Services
                     <svg
                       className="w-3 h-3 ml-1 inline-block"
                       fill="none"
@@ -162,66 +188,79 @@ const NavbarRJ = () => {
                         <a
                           className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
                           href="#"
+                          onClick={handleNavItemClick}
                         >
-                          Actors
+                          All Services
                         </a>
                       </li>
                       <li>
                         <a
                           className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
                           href="#"
+                          onClick={handleNavItemClick}
                         >
-                          Influencers
+                          Modal Management
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
+                          href="#"
+                          onClick={handleNavItemClick}
+                        >
+                          Casting Services
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
+                          href="#"
+                          onClick={handleNavItemClick}
+                        >
+                          Photoshoot & Campaigns
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
+                          href="#"
+                          onClick={handleNavItemClick}
+                        >
+                          Portfolio Devlopemnet
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
+                          href="#"
+                          onClick={handleNavItemClick}
+                        >
+                          Fashion Modeling
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
+                          href="#"
+                          onClick={handleNavItemClick}
+                        >
+                          Brand Collaboration
                         </a>
                       </li>
                     </ul>
                   )}
                 </li>
 
-                {/* Contact Dropdown */}
-                <li className="relative">
-                  <button
-                    type="button"
-                    onClick={() => toggleDropdown("contact")}
-                    className="w-full lg:w-auto flex items-center text-[0.85rem] font-medium tracking-[0.12em] uppercase px-[0.9rem] py-2 cursor-pointer !bg-transparent !border-none text-black hover:text-primary"
+                {/* Contact */}
+                <li>
+                  <Link
+                    to="/contact-us"
+                    onClick={handleNavItemClick}
+                    className="block text-[0.85rem] font-medium tracking-[0.12em] uppercase px-[0.9rem] py-2 no-underline text-black hover:text-primary"
                   >
-                    CONTACT
-                    <svg
-                      className="w-3 h-3 ml-1 inline-block"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </button>
-                  {openDropdown === "contact" && (
-                    <ul className="lg:absolute lg:top-full lg:left-0 bg-white lg:shadow-lg lg:rounded lg:min-w-[160px] lg:mt-1 pl-4 lg:pl-0 list-none m-0 p-0 lg:border lg:border-gray-200">
-                      <li>
-                        <a
-                          className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
-                          href="#"
-                        >
-                          Contact Form
-                        </a>
-                      </li>
-                      <li>
-                        <a
-                          className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
-                          href="#"
-                        >
-                          Location
-                        </a>
-                      </li>
-                    </ul>
-                  )}
+                    Contact Us
+                  </Link>
                 </li>
-
               </ul>
             </div>
 
@@ -229,8 +268,15 @@ const NavbarRJ = () => {
             <button
               className="btn-drake-outline mt-3 lg:mt-0"
               onClick={() => {
-                setShowLogin(false); 
+                setShowLogin(false);
                 setIsModalOpen(true);
+                setOpenDropdown(null);
+                setIsOpen(false);
+                // Optional: sign up pe bhi scroll top chahiye to yaha bhi add kar sakte ho
+                window.scrollTo({
+                  top: 0,
+                  behavior: "smooth",
+                });
               }}
             >
               Sign up
@@ -241,13 +287,11 @@ const NavbarRJ = () => {
 
       {/* MODAL OVERLAY */}
       <div
-        className={`
-          fixed inset-0 z-[1100] 
-          flex items-center justify-center 
-          bg-black/30 backdrop-blur-sm
-          transition-opacity duration-300
-          ${isModalOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
-        `}
+        className={`fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 backdrop-blur-sm transition-opacity duration-300 ${
+          isModalOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
         onClick={() => {
           setIsModalOpen(false);
           setShowLogin(false);
@@ -255,12 +299,9 @@ const NavbarRJ = () => {
       >
         {/* Modal box */}
         <div
-          className={`
-            bg-white rounded-xl shadow-lg px-8 py-6 
-            w-full max-w-[720px] max-h-[90vh] overflow-y-auto
-            transform transition-transform duration-300
-            ${isModalOpen ? "scale-100 translate-y-0" : "scale-95 -translate-y-2"}
-          `}
+          className={`bg-white rounded-xl shadow-lg px-8 py-6 w-full max-w-[720px] max-h-[90vh] overflow-y-auto transform transition-transform duration-300 ${
+            isModalOpen ? "scale-100 translate-y-0" : "scale-95 -translate-y-2"
+          }`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close button */}
@@ -280,7 +321,6 @@ const NavbarRJ = () => {
           <div className="mt-2">
             {showLogin ? <Login /> : <SignUp />}
 
-            {/* UPDATED CONDITIONAL TEXT */}
             {showLogin ? (
               <p className="mt-2 text-center flex justify-center items-center">
                 <span>Don&apos;t have an account?</span>

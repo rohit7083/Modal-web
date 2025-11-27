@@ -10,10 +10,10 @@ const WhoWeAre = () => {
         {/* Top big heading */}
         
 
-<h2 className="text-center text-3xl md:text-4xl font-semibold tracking-[0.25em] mb-10 text-primary">
 
-  About Drake
-</h2>
+<h2 className="text-3xl md:text-4xl font-serif tracking-[0.35em] text-pink-500 uppercase text-center mb-10">
+            About Drake
+          </h2>
 
         {/* 2 column row */}
         <div className="flex flex-col lg:flex-row items-start justify-between ">

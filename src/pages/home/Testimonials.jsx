@@ -46,11 +46,12 @@ const TestimonialsSection = () => {
       <div className="max-w-6xl mx-auto px-4">
         {/* Heading */}
 
-        <h2 className="text-primary text-center text-3xl md:text-4xl font-semibold tracking-[0.25em] mb-10">
-         Testimonials
-        </h2>
         
         
+         <h2 className="mb-10 text-3xl md:text-4xl font-serif tracking-[0.35em] text-pink-500 uppercase text-center">
+           Testimonials
+          </h2>
+
 
         {/* Grid */}
         <div className="grid gap-10 md:grid-cols-3">

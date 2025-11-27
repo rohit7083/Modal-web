@@ -6,6 +6,7 @@ import HomeSectionTwo from "./HeroSectionTwo"
 import HomeSectionThree from "./HomeSectionThree"
 import TestimonialsSection from './Testimonials'
 import OurServices from './OurServices'
+import News from "./News"
 import Footer from "./../../components/layout/Footer"
 
 function Home() {
@@ -18,6 +19,8 @@ function Home() {
 
 
       <HomeSectionThree />
+      <News />
+
       <TestimonialsSection />
       <OurServices />
 

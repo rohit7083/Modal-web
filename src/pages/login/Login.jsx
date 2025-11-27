@@ -1,6 +1,11 @@
 // src/pages/login/Login.jsx
-import React, { useState } from "react";
-import useJwt from "../../endpoints/jwt/useJwt"
+import React, { useState, useEffect } from "react";
+import useJwt from "../../endpoints/jwt/useJwt";
+import sodium from "libsodium-wrappers";
+
+// ✅ Static public key (server se mila hua) - BASE64
+//const PUBLIC_KEY_BASE64 = "P7FnNMp37TGfrU3Jkwitp2ESsSWIMIegHby/GybleDE=";
+const PUBLIC_KEY_BASE64 = "203db88555e364bf7f8b8a68b7dc24357c9c192ff9ad82002fe63885849ee50e";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -10,6 +15,15 @@ function Login() {
 
   const [errors, setErrors] = useState({});
   const [submitButton, setSubmitButton] = useState("Login");
+  const [sodiumReady, setSodiumReady] = useState(false);
+
+  // ✅ libsodium ready hone ka wait
+  useEffect(() => {
+    (async () => {
+      await sodium.ready;
+      setSodiumReady(true);
+    })();
+  }, []);
 
   const handleEmailChange = (e) => {
     const value = e.target.value;
@@ -32,7 +46,37 @@ function Login() {
     setErrors((prev) => ({ ...prev, password: "" }));
   };
 
-  const handleSubmit = (e) => {
+  // ✅ Helper: password ko libsodium se encrypt karo
+  const encryptPassword = async (password) => {
+    // ensure sodium ready
+    if (!sodiumReady) {
+      throw new Error("Crypto library not ready");
+    }
+
+    // public key ko base64 se bytes me convert
+    /* const publicKeyBytes = sodium.from_base64(
+      PUBLIC_KEY_BASE64,
+      sodium.base64_variants.ORIGINAL
+    ); */
+
+    const publicKey = sodium.from_hex(PUBLIC_KEY_BASE64.trim());
+
+    // password ko bytes me convert
+    const messageBytes = sodium.from_string(password);
+
+    // seal box encryption (sirf server private key se decrypt hoga)
+    const cipherBytes = sodium.crypto_box_seal(messageBytes, publicKey);
+
+    // cipher ko base64 me convert karke bhejenge
+    const encrypted = sodium.to_base64(
+      cipherBytes,
+      sodium.base64_variants.ORIGINAL
+    );
+
+    return encrypted;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const newErrors = {};
@@ -50,29 +94,39 @@ function Login() {
       return;
     }
 
-    setSubmitButton("Logging in...");
-    debugger
-const response = useJwt.login({
-      email: formData.email,
-      password: formData.password,
-    });
-    debugger
-    // Yaha aap backend API call kar sakte ho (JSON body ke sath)
-    // console.log("Login form submitted with data:", {
-    //   email: formData.email,
-    //   password: formData.password,
-    // });
+    if (!sodiumReady) {
+      alert("Please wait, security library is loading. Try again in a moment.");
+      return;
+    }
 
-    // Demo ke liye alert
-    alert("Login request submitted!");
+    try {
+      setSubmitButton("Logging in...");
 
-    // Optional: reset form
-    setFormData({
-      email: "",
-      password: "",
-    });
-    setErrors({});
-    setSubmitButton("Login");
+      // ✅ Yaha password encrypt ho raha hai
+      const encryptedPassword = await encryptPassword(formData.password);
+
+      debugger;
+      const response = await useJwt.login({
+        email: formData.email,
+        password: encryptedPassword, // 👈 ab encrypted password jaa raha hai
+      });
+      debugger;
+
+      // Demo ke liye alert
+      alert("Login request submitted!");
+
+      // Optional: reset form
+      setFormData({
+        email: "",
+        password: "",
+      });
+      setErrors({});
+      setSubmitButton("Login");
+    } catch (err) {
+      console.error("Login error:", err);
+      alert("Something went wrong while encrypting/sending the password.");
+      setSubmitButton("Login");
+    }
   };
 
   return (

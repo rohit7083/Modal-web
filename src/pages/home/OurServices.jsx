@@ -44,9 +44,11 @@ const OurServices = () => {
             <p className="text-xs tracking-[0.25em] uppercase text-gray-500 mb-1">
               Our Services
             </p>
-            <h2 className="text-primary text-2xl md:text-3xl font-semibold text-gray-900">
-              What we offer for brands & talent
-            </h2>
+           
+              <h2 className="mb-10 text-2xl md:text-3xl font-serif tracking-[0.35em] text-pink-500 uppercase text-start">
+          What we offer for brands & talent
+          </h2>
+
           </div>
 
           <button className="self-start md:self-auto mt-2 inline-flex items-center border border-gray-900 px-5 py-2 text-xs tracking-[0.2em] uppercase font-medium hover:bg-gray-900 hover:text-white transition">
