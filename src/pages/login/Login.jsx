@@ -100,23 +100,31 @@ function Login({ onLoginSuccess }) {
       // ✅ Yaha password encrypt ho raha hai
       const encryptedPassword = await encryptPassword(formData.password);
 
+      // 🔥 Service ko call – ab service khud tokens store karegi
       const response = await useJwt.login({
         email: formData.email,
         password: encryptedPassword, // 👈 encrypted password jaa raha hai
       });
 
-      // ✅ If response code 200 or 201 → redirect to /user_profile
       if (response?.status === 200 || response?.status === 201) {
-        const authPayload = response.data || response;
-        localStorage.setItem("authData", JSON.stringify(authPayload));
+        const data = response.data;
+
+        // ✅ User object store karna ho to
+        if (data?.user) {
+          localStorage.setItem("user", JSON.stringify(data.user));
+        }
+
+        // ✅ Pura auth response store karna ho to (optional)
+        localStorage.setItem("authData", JSON.stringify(data));
 
         // ✅ Navbar ko batao ke login success ho gaya (modal band + Profile button)
         if (typeof onLoginSuccess === "function") {
           onLoginSuccess();
         }
 
-        // ✅ SUCCESSFUL LOGIN → USER PROFILE PAR BEJ DO
+        // ✅ SUCCESSFUL LOGIN → HOME ya USER PROFILE PAR BEJ DO
         navigate("/");
+        // navigate("/user_profile");  // agar yaha bhejna ho to isko use karo
       } else {
         alert("Invalid credentials or something went wrong.");
       }

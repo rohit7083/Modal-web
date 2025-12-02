@@ -13,11 +13,24 @@ function UserProfile() {
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState(1);
 
+  // ✅ yaha gender store karenge (step1 se)
+  const [gender, setGender] = useState("");
+
   const navigate = useNavigate();
 
   // STEP 1 → STEP 2 (Update Profile → Physical)
   const handleUpdateProfileSuccess = (data) => {
     console.log("Update Profile Submitted:", data);
+
+    // 🔥 yaha se gender nikaal ke store karein
+    // API response sample: { message: "...", user: { gender: "Female", ... } }
+    const detectedGender =
+      data?.user?.gender || // agar backend ka response direct mila
+      data?.gender || // agar form ne sirf gender send kiya ho
+      "";
+
+    setGender(detectedGender); // ✅ second form ke liye gender store
+
     setProgress(25); // ✅ Step 1 complete → 25%
     setCurrentStep(2);
   };
@@ -87,7 +100,6 @@ function UserProfile() {
             <h3 className="text-lg font-semibold mb-4">
               Step 1 of 4 — Update Profile
             </h3>
-            {/* ⬇️ Make sure UpdateProfile form is accepting onSubmitSuccess prop */}
             <UpdateProfile onSubmitSuccess={handleUpdateProfileSuccess} />
           </div>
         )}
@@ -98,7 +110,11 @@ function UserProfile() {
             <h3 className="text-lg font-semibold mb-4">
               Step 2 of 4 — Physical Attributes
             </h3>
-            <PhysicalAttributesForm onSubmitSuccess={handlePhysicalSuccess} />
+            {/* 🔥 yaha gender prop pass kar rahe */}
+            <PhysicalAttributesForm
+              gender={gender}
+              onSubmitSuccess={handlePhysicalSuccess}
+            />
           </div>
         )}
 
@@ -118,7 +134,7 @@ function UserProfile() {
         {currentStep === 4 && (
           <div>
             <h3 className="text-lg font-semibold mb-4">
-              Step 4 of 4 — Portfolio Upload
+              Step 4 of 4 — Media Upload
             </h3>
             <MediaUploadForm onSubmitSuccess={handlePortfolioSuccess} />
           </div>

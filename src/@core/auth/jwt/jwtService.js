@@ -1,3 +1,4 @@
+// src/endpoints/jwt/jwtService.js
 import axios from 'axios'
 import jwtDefaultConfig from './jwtDefaultConfig'
 
@@ -26,7 +27,6 @@ export default class JwtService {
 
         // ** If token is present add it to request's Authorization Header
         if (accessToken) {
-          // ** eslint-disable-next-line no-param-reassign
           config.headers = config.headers || {}
           config.headers.Authorization = `${this.jwtConfig.tokenType} ${accessToken}`
           console.log('Added Authorization header');
@@ -115,9 +115,20 @@ export default class JwtService {
   }
 
   refreshToken() {
-    return axios.post(this.jwtConfig.refreshEndpoint, {
-      refreshToken: this.getRefreshToken(),
-    })
+    return axios
+      .post(this.jwtConfig.refreshEndpoint, {
+        refreshToken: this.getRefreshToken(),
+      })
+      .then((response) => {
+        const data = response.data
+        if (data?.access_token) {
+          this.setToken(data.access_token)
+        }
+        if (data?.refresh_token) {
+          this.setRefreshToken(data.refresh_token)
+        }
+        return response
+      })
   }
 
   /*
@@ -134,21 +145,48 @@ export default class JwtService {
     return axios.post(`${this.jwtConfig.otpVerifyEndPoint}/${token}`, otpData);
   }
 
+  // 🔥 LOGIN: yahi pe tokens store kar rahe hain
   login(...args) {
     console.log('Calling login API');
     
-    return axios.post(this.jwtConfig.loginEndpoint, ...args)
-    
+    return axios
+      .post(this.jwtConfig.loginEndpoint, ...args)
+      .then((response) => {
+        try {
+          const data = response.data
+          if (data?.access_token) {
+            this.setToken(data.access_token)
+          }
+          if (data?.refresh_token) {
+            this.setRefreshToken(data.refresh_token)
+          }
+          console.log('Tokens saved to localStorage');
+        } catch (e) {
+          console.error('Error while saving tokens:', e)
+        }
+        return response
+      })
+      .catch((error) => {
+        console.error('Login API error:', error);
+        throw error;
+      })
   }
 
   updateProfile(...args){
     console.log('update profile service')
-    return axios.post(this.jwtConfig.updatetProfileEndpoint , ...args)
+    return axios.patch(this.jwtConfig.updatetProfileEndpoint , ...args)
   }
- 
 
+  physicalAttributeSet(...args){
+    return axios.post(this.jwtConfig.physicalAttributeFormEndpoint, ...args)
+  }
 
+  professionalFormSet(...args){
 
-
+  return axios.post(this.jwtConfig.professionalFormEndpoint,...args)
+  }
+  modelMediaSet(...args){
+    return axios.post(this.jwtConfig.ProfileMediaSetEndpoint, ...args)
+  }
 
 }

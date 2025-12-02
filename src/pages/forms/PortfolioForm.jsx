@@ -1,5 +1,6 @@
 // src/pages/signUp/MediaUploadForm.jsx
 import React, { useState } from "react";
+import useJwt from "./../../endpoints/jwt/useJwt";
 
 function MediaUploadForm({ onSubmitSuccess }) {
   const [formData, setFormData] = useState({
@@ -12,6 +13,8 @@ function MediaUploadForm({ onSubmitSuccess }) {
   });
 
   const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleFileChange = (e) => {
     const { name, files } = e.target;
@@ -26,9 +29,10 @@ function MediaUploadForm({ onSubmitSuccess }) {
       ...prev,
       [name]: "",
     }));
+    setApiError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const requiredFields = [
@@ -53,13 +57,39 @@ function MediaUploadForm({ onSubmitSuccess }) {
       return;
     }
 
-    // Yaha tum chaaho toh FormData bana ke API call bhi kar sakte ho
-    // abhi ke liye parent ko data bhej rahe hain:
-    if (onSubmitSuccess) {
-      onSubmitSuccess(formData);
-    } else {
-      console.log("MEDIA UPLOAD PAYLOAD:", formData);
-      alert("Media form submitted (check console).");
+    // 🔹 Yaha se FormData banayenge — backend ko aise hi chahiye
+    const body = new FormData();
+    body.append("full_body_front", formData.full_body_front);
+    body.append("full_body_left_side", formData.full_body_left_side);
+    body.append("full_body_right_side", formData.full_body_right_side);
+    body.append("head_shot", formData.head_shot);
+    body.append("profile_photo", formData.profile_photo);
+    body.append("introduction_video", formData.introduction_video);
+
+    try {
+      setIsSubmitting(true);
+      setApiError("");
+
+      // 🔥 tumhari method: e = FormData
+      const response = await useJwt.modelMediaSet(body);
+
+      console.log("MEDIA UPLOAD API RESPONSE:", response);
+
+      if (onSubmitSuccess) {
+        // parent ko API ka data ya kam se kam success notify
+        onSubmitSuccess(response?.data || {});
+      } else {
+        console.log("MEDIA UPLOAD PAYLOAD (FormData sent)");
+        alert("Media uploaded successfully (check console & network).");
+      }
+    } catch (error) {
+      console.error("Error while uploading media:", error);
+      setApiError(
+        error?.response?.data?.message ||
+          "Something went wrong while uploading media."
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -69,13 +99,19 @@ function MediaUploadForm({ onSubmitSuccess }) {
       className="w-full max-w-3xl space-y-6 bg-white"
     >
       <h2 className="text-lg font-semibold tracking-[0.16em] uppercase text-gray-800">
-        Portfolio Media
+       Media
       </h2>
 
       <p className="text-xs text-gray-500">
         Please upload clear images and a short introduction video. All fields
         are required.
       </p>
+
+      {apiError && (
+        <p className="text-xs text-red-500 bg-red-50 border border-red-200 px-3 py-2 rounded">
+          {apiError}
+        </p>
+      )}
 
       {/* Full Body Front */}
       <div>
@@ -238,9 +274,10 @@ function MediaUploadForm({ onSubmitSuccess }) {
       {/* Submit Button */}
       <button
         type="submit"
-        className="relative w-full mt-2 py-2 rounded-lg font-semibold tracking-[0.12em] uppercase text-sm bg-black !text-white hover:bg-primary hover:!text-white transition"
+        disabled={isSubmitting}
+        className="relative w-full mt-2 py-2 rounded-lg font-semibold tracking-[0.12em] uppercase text-sm bg-black !text-white hover:bg-primary hover:!text-white transition disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        Save Media
+        {isSubmitting ? "Uploading..." : "Save Media"}
       </button>
     </form>
   );

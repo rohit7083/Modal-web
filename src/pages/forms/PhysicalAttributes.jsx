@@ -1,7 +1,8 @@
 // src/pages/signUp/PhysicalAttributesForm.jsx
 import React, { useState } from "react";
+import useJwt from "../../endpoints/jwt/useJwt";
 
-function PhysicalAttributesForm({ onSubmitSuccess }) {
+function PhysicalAttributesForm({ onSubmitSuccess, gender }) {
   const [formData, setFormData] = useState({
     height: "",
     weight: "",
@@ -25,6 +26,11 @@ function PhysicalAttributesForm({ onSubmitSuccess }) {
   });
 
   const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isMale = gender?.toLowerCase() === "male";
+  const isFemale = gender?.toLowerCase() === "female";
 
   // generic change handler
   const handleChange = (e) => {
@@ -39,12 +45,13 @@ function PhysicalAttributesForm({ onSubmitSuccess }) {
       ...prev,
       [name]: "",
     }));
+    setApiError("");
   };
 
   // numeric-like fields (height, weight etc)
   const handleNumericLikeChange = (e) => {
     const { name, value } = e.target;
-    // sirf digits, dot, space, cm/inch jaisa unit allow karne ke liye
+    // sirf digits, dot, space, /, - allow
     const cleaned = value.replace(/[^0-9.\s/-]/g, "");
     setFormData((prev) => ({
       ...prev,
@@ -54,11 +61,13 @@ function PhysicalAttributesForm({ onSubmitSuccess }) {
       ...prev,
       [name]: "",
     }));
+    setApiError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // ✅ Common required fields (for all genders)
     const requiredFields = [
       "height",
       "weight",
@@ -75,6 +84,16 @@ function PhysicalAttributesForm({ onSubmitSuccess }) {
       "shape",
     ];
 
+    // ✅ Extra required for Male
+    if (isMale) {
+      requiredFields.push("chest_size", "suit_jacket_size", "facial_hair");
+    }
+
+    // ✅ Extra required for Female
+    if (isFemale) {
+      requiredFields.push("bust_cup_size", "dress_size");
+    }
+
     const newErrors = {};
 
     requiredFields.forEach((field) => {
@@ -88,12 +107,68 @@ function PhysicalAttributesForm({ onSubmitSuccess }) {
       return;
     }
 
-    // Step 2 success → parent ko data bhejo
-    if (onSubmitSuccess) {
-      onSubmitSuccess(formData);
-    } else {
-      console.log("PHYSICAL ATTRIBUTES PAYLOAD:", formData);
-      alert("Physical attributes form submitted (check console).");
+    // 🔹 COMMON FIELDS ONLY (trim karke)
+    const commonPayload = {
+      height: formData.height.trim(),
+      weight: formData.weight.trim(),
+      chest_bust: formData.chest_bust.trim(),
+      waist: formData.waist.trim(),
+      hips: formData.hips.trim(),
+      shoulder: formData.shoulder.trim(),
+      shoe_size: formData.shoe_size.trim(),
+      eye_color: formData.eye_color.trim(),
+      hair_color: formData.hair_color.trim(),
+      complexion: formData.complexion.trim(),
+      tattoos_or_piercings: formData.tattoos_or_piercings.trim(),
+      body_type: formData.body_type.trim(),
+      hair_length: formData.hair_length.trim(),
+      shape: formData.shape.trim(),
+    };
+
+    // 🔥 FINAL PAYLOAD – gender ke hisaab se fields add honge
+    let payload = { ...commonPayload, gender };
+
+    if (isMale) {
+      payload = {
+        ...payload,
+        chest_size: formData.chest_size.trim(),
+        suit_jacket_size: formData.suit_jacket_size.trim(),
+        facial_hair: formData.facial_hair.trim(),
+        // NOTE: bust_cup_size / dress_size YAHAN NAHI HAIN
+      };
+    } else if (isFemale) {
+      payload = {
+        ...payload,
+        bust_cup_size: formData.bust_cup_size.trim(),
+        dress_size: formData.dress_size.trim(),
+        // NOTE: chest_size / suit_jacket_size / facial_hair YAHAN NAHI HAIN
+      };
+    }
+    // agar gender kuch aur hai to sirf common + gender hi jayega
+
+    try {
+      setIsSubmitting(true);
+      setApiError("");
+
+      // ✅ Tumhara service method
+      const response = await useJwt.physicalAttributeSet(payload);
+
+      console.log("PHYSICAL ATTRIBUTES API RESPONSE:", response);
+
+      if (onSubmitSuccess) {
+        onSubmitSuccess(response?.data || payload);
+      } else {
+        console.log("PHYSICAL ATTRIBUTES PAYLOAD:", payload);
+        alert("Physical attributes form submitted (check console).");
+      }
+    } catch (error) {
+      console.error("Error while saving physical attributes:", error);
+      setApiError(
+        error?.response?.data?.message ||
+          "Something went wrong while saving physical attributes."
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -150,12 +225,13 @@ function PhysicalAttributesForm({ onSubmitSuccess }) {
         {/* Chest/Bust */}
         <div>
           <label className="text-sm font-medium mb-1 text-gray-700 block">
-            Chest / Bust <span className="text-xs text-gray-500">(inches)</span>
+            {isFemale ? "Bust" : "Chest"}{" "}
+            <span className="text-xs text-gray-500">(inches)</span>
           </label>
           <input
             type="text"
             name="chest_bust"
-            placeholder="e.g. 38"
+            placeholder={isFemale ? "e.g. 34" : "e.g. 38"}
             value={formData.chest_bust}
             onChange={handleNumericLikeChange}
             className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:border-primary focus:ring-1 focus:ring-primary outline-none"
@@ -223,45 +299,22 @@ function PhysicalAttributesForm({ onSubmitSuccess }) {
         </div>
       </div>
 
-      {/* Row 4: Shoe Size + Suit/Jacket Size */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Shoe Size */}
-        <div>
-          <label className="text-sm font-medium mb-1 text-gray-700 block">
-            Shoe Size
-          </label>
-          <input
-            type="text"
-            name="shoe_size"
-            placeholder="e.g. 8 / 42"
-            value={formData.shoe_size}
-            onChange={handleNumericLikeChange}
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-          />
-          {errors.shoe_size && (
-            <p className="mt-1 text-xs text-red-500">{errors.shoe_size}</p>
-          )}
-        </div>
-
-        {/* Suit / Jacket Size */}
-        <div>
-          <label className="text-sm font-medium mb-1 text-gray-700 block">
-            Suit / Jacket Size
-          </label>
-          <input
-            type="text"
-            name="suit_jacket_size"
-            placeholder="e.g. 38R, 40L"
-            value={formData.suit_jacket_size}
-            onChange={handleChange}
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-          />
-          {errors.suit_jacket_size && (
-            <p className="mt-1 text-xs text-red-500">
-              {errors.suit_jacket_size}
-            </p>
-          )}
-        </div>
+      {/* Row 4: Shoe Size (full width) */}
+      <div>
+        <label className="text-sm font-medium mb-1 text-gray-700 block">
+          Shoe Size
+        </label>
+        <input
+          type="text"
+          name="shoe_size"
+          placeholder="e.g. 8 / 42"
+          value={formData.shoe_size}
+          onChange={handleNumericLikeChange}
+          className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+        />
+        {errors.shoe_size && (
+          <p className="mt-1 text-xs text-red-500">{errors.shoe_size}</p>
+        )}
       </div>
 
       {/* Row 5: Eye Color + Hair Color */}
@@ -367,28 +420,78 @@ function PhysicalAttributesForm({ onSubmitSuccess }) {
         </div>
       </div>
 
-      {/* Row 7: Chest Size + Bust Cup / Dress Size */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Chest Size */}
-        <div>
-          <label className="text-sm font-medium mb-1 text-gray-700 block">
-            Chest Size
-          </label>
-          <input
-            type="text"
-            name="chest_size"
-            placeholder="e.g. 38"
-            value={formData.chest_size}
-            onChange={handleNumericLikeChange}
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-          />
-          {errors.chest_size && (
-            <p className="mt-1 text-xs text-red-500">{errors.chest_size}</p>
-          )}
-        </div>
+      {/* Row 7: Gender specific blocks */}
 
-        {/* Bust Cup Size + Dress Size */}
-        <div className="grid grid-cols-1 gap-2">
+      {/* 🔵 Male specific: Chest size + Suit size + Facial hair */}
+      {isMale && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Chest Size */}
+          <div>
+            <label className="text-sm font-medium mb-1 text-gray-700 block">
+              Chest Size
+            </label>
+            <input
+              type="text"
+              name="chest_size"
+              placeholder="e.g. 38"
+              value={formData.chest_size}
+              onChange={handleNumericLikeChange}
+              className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+            />
+            {errors.chest_size && (
+              <p className="mt-1 text-xs text-red-500">{errors.chest_size}</p>
+            )}
+          </div>
+
+          {/* Suit / Jacket Size */}
+          <div>
+            <label className="text-sm font-medium mb-1 text-gray-700 block">
+              Suit / Jacket Size
+            </label>
+            <input
+              type="text"
+              name="suit_jacket_size"
+              placeholder="e.g. 38R, 40L"
+              value={formData.suit_jacket_size}
+              onChange={handleChange}
+              className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+            />
+            {errors.suit_jacket_size && (
+              <p className="mt-1 text-xs text-red-500">
+                {errors.suit_jacket_size}
+              </p>
+            )}
+          </div>
+
+          {/* Facial Hair */}
+          <div>
+            <label className="text-sm font-medium mb-1 text-gray-700 block">
+              Facial Hair
+            </label>
+            <select
+              name="facial_hair"
+              value={formData.facial_hair}
+              onChange={handleChange}
+              className="border border-gray-300 rounded-lg px-3 py-2 w-full bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+            >
+              <option value="">Select facial hair</option>
+              <option value="None">None</option>
+              <option value="Clean Shaven">Clean Shaven</option>
+              <option value="Stubble">Stubble</option>
+              <option value="Beard">Beard</option>
+              <option value="Moustache">Moustache</option>
+              <option value="Beard & Moustache">Beard & Moustache</option>
+            </select>
+            {errors.facial_hair && (
+              <p className="mt-1 text-xs text-red-500">{errors.facial_hair}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 🩷 Female specific: Bust cup + Dress size */}
+      {isFemale && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Bust Cup Size */}
           <div>
             <label className="text-sm font-medium mb-1 text-gray-700 block">
@@ -427,7 +530,7 @@ function PhysicalAttributesForm({ onSubmitSuccess }) {
             )}
           </div>
         </div>
-      </div>
+      )}
 
       {/* Row 8: Hair Length + Shape */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -484,54 +587,27 @@ function PhysicalAttributesForm({ onSubmitSuccess }) {
         </div>
       </div>
 
-      {/* Row 9: Facial Hair + Tattoos/Piercings */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Facial Hair */}
-        <div>
-          <label className="text-sm font-medium mb-1 text-gray-700 block">
-            Facial Hair
-          </label>
-          <select
-            name="facial_hair"
-            value={formData.facial_hair}
-            onChange={handleChange}
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-          >
-            <option value="">Select facial hair</option>
-            <option value="None">None</option>
-            <option value="Clean Shaven">Clean Shaven</option>
-            <option value="Stubble">Stubble</option>
-            <option value="Beard">Beard</option>
-            <option value="Moustache">Moustache</option>
-            <option value="Beard & Moustache">Beard & Moustache</option>
-          </select>
-          {errors.facial_hair && (
-            <p className="mt-1 text-xs text-red-500">{errors.facial_hair}</p>
-          )}
-        </div>
-
-        {/* Tattoos or Piercings */}
-        <div>
-          <label className="text-sm font-medium mb-1 text-gray-700 block">
-            Tattoos or Piercings
-            <span className="text-xs text-gray-500 ml-1">
-              (describe with locations)
-            </span>
-          </label>
-          <textarea
-            name="tattoos_or_piercings"
-            placeholder="e.g. Small tattoo on wrist, ear piercings..."
-            value={formData.tattoos_or_piercings}
-            onChange={handleChange}
-            rows={3}
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full resize-y focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-          />
-          {errors.tattoos_or_piercings && (
-            <p className="mt-1 text-xs text-red-500">
-              {errors.tattoos_or_piercings}
-            </p>
-          )}
-        </div>
+      {/* Row 9: Tattoos/Piercings (common, full width) */}
+      <div>
+        <label className="text-sm font-medium mb-1 text-gray-700 block">
+          Tattoos or Piercings
+          <span className="text-xs text-gray-500 ml-1">
+            (describe with locations)
+          </span>
+        </label>
+        <textarea
+          name="tattoos_or_piercings"
+          placeholder="e.g. Small tattoo on wrist, ear piercings..."
+          value={formData.tattoos_or_piercings}
+          onChange={handleChange}
+          rows={3}
+          className="border border-gray-300 rounded-lg px-3 py-2 w-full resize-y focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+        />
+        {errors.tattoos_or_piercings && (
+          <p className="mt-1 text-xs text-red-500">
+            {errors.tattoos_or_piercings}
+          </p>
+        )}
       </div>
 
       {/* Submit Button */}
