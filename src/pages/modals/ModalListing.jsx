@@ -1,6 +1,6 @@
 // src/pages/Models.jsx
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
 const modelsData = {
   men: [
@@ -19,7 +19,7 @@ const modelsData = {
         eyes: "Green",
       },
     },
-    
+
     {
       name: "Caio",
       city: "Bangalore",
@@ -35,7 +35,7 @@ const modelsData = {
         eyes: "Hazel",
       },
     },
-    
+
     {
       name: "Valmir",
       city: "Pune",
@@ -66,7 +66,7 @@ const modelsData = {
         eyes: "Brown",
       },
     },
-   
+
     {
       name: "Rehan",
       city: "Jaipur",
@@ -418,7 +418,7 @@ function Models() {
   const models = modelsData[currentType] || modelsData.men;
 
   return (
-    <div className="min-h-screen bg-white mt-30">
+    <div className="min-h-screen bg-white ">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Page Heading */}
         <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-8">
@@ -428,7 +428,11 @@ function Models() {
         {/* Grid */}
         <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {models.map((model, index) => (
-            <div key={index} className="group cursor-pointer">
+            <Link
+              key={index}
+              to="/profile"
+              className="group cursor-pointer block"
+            >
               {/* Card image + hover overlay */}
               <div className="relative">
                 <img
@@ -464,7 +468,7 @@ function Models() {
                 </p>
                 <p className="text-xs text-gray-500 mt-1">{model.city}</p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

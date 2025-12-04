@@ -9,7 +9,7 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("posts"); 
 
   return (
-    <div className="mt-30 min-h-screen bg-gradient-to-b from-slate-50 to-white text-black">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-black">
       <div className="max-w-6xl mx-auto px-4 pt-8 pb-14 ">
         {/* ===== TOP PROFILE CARD ===== */}
         <div className="bg-white border rounded-2xl shadow-sm p-5 md:p-7 p-[4px] bg-gradient-to-br from-pink-100 to-pink-300">
@@ -46,10 +46,10 @@ const ProfilePage = () => {
 
                 {/* Primary actions */}
                 <div className="flex flex-wrap gap-2">
-                  <button className="px-4 py-2 text-sm font-medium rounded-full bg-black text-white hover:bg-gray-900 transition">
+                  <button className="bg-white px-4 py-2 text-sm font-medium rounded-full border border-gray-300 text-gray-800 hover:bg-gray-50 transition">
                     Hire for a Project
                   </button>
-                  <button className="px-4 py-2 text-sm font-medium rounded-full border border-gray-300 text-gray-800 hover:bg-gray-50 transition">
+                  <button className="bg-white px-4 py-2 text-sm font-medium rounded-full border border-gray-300 text-gray-800 hover:bg-gray-50 transition">
                     Contact Agent
                   </button>
                 </div>

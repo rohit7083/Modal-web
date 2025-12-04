@@ -8,30 +8,35 @@ import ModalsListing from "../pages/modals/ModalListing"
 import AboutUs from "../pages/aboutUs/AboutUs"
 import ContactUs from "../pages/contactUs/ContactUs"
 import UserProfile from "../pages/Profile/user_profile"
-// import Login from "../pages/login/Login"
+import PerdonalProfile from "../pages/Profile/temp" 
 
 const NotFound = () => <div>404 - Page not found</div>
 
 const AppRouter = () => {
   return (
     <BrowserRouter>
-    <NavbarRJ/>
-      <Routes>
-        {/* Public routes */}
-        
-        <Route path="/" element={<Home />} />           
-          <Route path='/contact-us' element={<ContactUs />} />
-          <Route path='/about-us' element={<AboutUs />} />
+      {/* 🔹 Top: Navbar (fixed) */}
+      <NavbarRJ />
+
+      {/* 🔹 Center: Routing content (Navbar ke niche dikhane ke liye padding) */}
+      <main className="pt-24">
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/contact-us" element={<ContactUs />} />
+          <Route path="/about-us" element={<AboutUs />} />
           <Route path="/modals/:type" element={<ModalsListing />} />
           <Route path="/dashboard" element={<div>Dashboard</div>} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path='/user_profile' element ={<UserProfile/>} />
-       
+          <Route path="/user_profile" element={<UserProfile />} />
+          <Route path='/personal-Profile' element={<PerdonalProfile />} />
 
-        {/* 404 */}
-        <Route path="*" element={<NotFound />} />
-        
-      </Routes>
+          {/* 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+
+      {/* 🔹 Bottom: Footer */}
       <Footer />
     </BrowserRouter>
   )
