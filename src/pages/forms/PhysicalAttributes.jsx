@@ -151,8 +151,9 @@ function PhysicalAttributesForm({ onSubmitSuccess, gender }) {
       setApiError("");
 
       // ✅ Tumhara service method
+      debugger
       const response = await useJwt.physicalAttributeSet(payload);
-
+debugger
       console.log("PHYSICAL ATTRIBUTES API RESPONSE:", response);
 
       if (onSubmitSuccess) {

@@ -16,7 +16,14 @@ export default {
   updatetProfileEndpoint : '/model/user/update-profile',
   physicalAttributeFormEndpoint: '/model/profile',
   professionalFormEndpoint : '/model/professional',
-  ProfileMediaSetEndpoint: 'model/media/upload'
+  ProfileMediaSetEndpoint: 'model/media/upload',
   
+
+/*
+*profile endpoint 
+*/
+addMediaToProfileEndpoint : '/model/images/videos',
+
+
   
 }

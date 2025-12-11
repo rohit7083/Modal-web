@@ -35,7 +35,7 @@ const ProfilePage = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-2xl md:text-3xl font-semibold">
-                      Aubrey Plaza
+                      Aubrey Plazad
                     </h2>
                     <span className="text-blue-500 text-xl">✔</span>
                   </div>
