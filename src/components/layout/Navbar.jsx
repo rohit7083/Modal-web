@@ -260,7 +260,7 @@ const NavbarRJ = () => {
                 </li>
 
                 {/* Contact */}
-                {/* <li>
+                <li>
                   <Link
                     to="/store"
                     onClick={handleNavItemClick}
@@ -268,7 +268,7 @@ const NavbarRJ = () => {
                   >
                    Store
                   </Link>
-                </li> */}
+                </li>
 
                  <li>
                   <Link

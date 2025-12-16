@@ -1,8 +1,18 @@
 import React from 'react'
+import HeroSection from './HeroSection'
+import HeroSectionTwo from "./HeroSectionTwo"
+import HeroThree from "./HeroSectionThree"
 
 function index() {
   return (
-    <div>store</div>
+    <div>
+
+
+<HeroSection />
+<HeroSectionTwo />
+<HeroThree />
+
+    </div>
   )
 }
 

@@ -9,21 +9,22 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 // ===== LinkModal component (copied modal style from NavbarRJ) =====
 const LinkModal = ({ open, onClose, initialLinks = [], onSave }) => {
- const platforms = [
-  "Twitter",
-  "Facebook",
-  "Instagram",
-  "TikTok",
-  "Snapchat",
-  "Pinterest",
-  "LinkedIn",
-  "YouTube"
-];
+  const platforms = [
+    "Twitter",
+    "Facebook",
+    "Instagram",
+    "TikTok",
+    "Snapchat",
+    "Pinterest",
+    "LinkedIn",
+    "YouTube"
+  ];
 
   const [selectedPlatform, setSelectedPlatform] = useState(platforms[0]);
   const [url, setUrl] = useState("");
   const [links, setLinks] = useState(initialLinks || []);
   const [error, setError] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   // reset when opened/closed
   useEffect(() => {
@@ -69,11 +70,21 @@ const LinkModal = ({ open, onClose, initialLinks = [], onSave }) => {
   };
 
   const handleSave = async () => {
-    // call parent's onSave with new links
-    if (onSave) {
-      await onSave(links);
+    try {
+      setSaving(true);
+      setError(null);
+      
+      // call parent's onSave with new links
+      if (onSave) {
+        await onSave(links);
+      }
+      
+      onClose();
+    } catch (err) {
+      setError(err.message || "Failed to save links");
+    } finally {
+      setSaving(false);
     }
-    onClose();
   };
 
   if (!open) return null;
@@ -119,10 +130,10 @@ const LinkModal = ({ open, onClose, initialLinks = [], onSave }) => {
           />
 
           <div className="flex gap-2">
-            <button onClick={handleAdd} className="px-4 py-2 rounded-full bg-white text-white text-sm border-black">
+            <button onClick={handleAdd} className="px-4 py-2 rounded-full border text-sm hover:bg-gray-50 transition">
               Add
             </button>
-            <button onClick={() => { setUrl(""); setError(null); }} className="px-4 py-2 rounded-full border text-sm">
+            <button onClick={() => { setUrl(""); setError(null); }} className="px-4 py-2 rounded-full border text-sm hover:bg-gray-50 transition">
               Clear
             </button>
           </div>
@@ -143,8 +154,8 @@ const LinkModal = ({ open, onClose, initialLinks = [], onSave }) => {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <a href={l.url} target="_blank" rel="noreferrer" className="text-xs underline">Open</a>
-                    <button onClick={() => handleRemove(l.platform)} className="text-xs text-red-600">Remove</button>
+                    <a href={l.url} target="_blank" rel="noreferrer" className="text-xs underline hover:text-blue-600">Open</a>
+                    <button onClick={() => handleRemove(l.platform)} className="text-xs text-red-600 hover:text-red-800">Remove</button>
                   </div>
                 </div>
               ))}
@@ -152,8 +163,16 @@ const LinkModal = ({ open, onClose, initialLinks = [], onSave }) => {
           </div>
 
           <div className="flex justify-end gap-2 pt-3">
-            <button onClick={onClose} className="px-4 py-2 rounded-full border">Cancel</button>
-            <button onClick={handleSave} className="px-4 py-2 rounded-full bg-primary text-white">Save</button>
+            <button onClick={onClose} className="px-4 py-2 rounded-full border hover:bg-gray-50 transition" disabled={saving}>
+              Cancel
+            </button>
+            <button 
+              onClick={handleSave} 
+              className="px-4 py-2 rounded-full border text-sm hover:bg-gray-50 transition"
+              disabled={saving}
+            >
+              {saving ? "Saving..." : "Save"}
+            </button>
           </div>
         </div>
       </div>
@@ -167,6 +186,7 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // helper: initials
   const getInitials = (first, last) => {
@@ -211,10 +231,6 @@ const ProfilePage = () => {
     fetchInfo();
   }, []);
 
-  // Note: per request, removed the early returns for loading / error states.
-  // The component now always renders the profile layout. We keep API logic
-  // intact; when profile is null we render sensible fallbacks so UI doesn't break.
-
   // safe destructure
   const basic = profile?.basic_info ?? {};
   const physical = profile?.physical_profile ?? {};
@@ -231,24 +247,34 @@ const ProfilePage = () => {
 
   const handleSaveLinks = async (links) => {
     try {
-      // if you have an API endpoint replace this with the real call
-      // e.g. await useJwt.updateProfileLinks({ links })
-      // for now we update local state and log
+      // Call the actual API endpoint
+      const response = await useJwt.addLinksToProfile(links);
+      
+      console.log("Links saved successfully:", response);
+      
+      // Update local state with the saved links
       const updated = { ...profile };
       updated.basic_info = { ...(updated.basic_info || {}), links };
       setProfile(updated);
-      console.log("Saved links payload:", links);
+      
+      // Show success message
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+      
     } catch (err) {
-      console.error("Failed to save links", err);
-      // you may want to show an error toast
+      console.error("Failed to save links:", err);
+      // Re-throw error so modal can display it
+      throw new Error(err.response?.data?.message || "Failed to save links. Please try again.");
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-black">
-      <div className="max-w-6xl mx-auto px-4 pt-8 pb-14 ">
+    
+
+      <div className="max-w-6xl mx-auto px-4 pt-8 pb-14">
         {/* ===== TOP PROFILE CARD ===== */}
-        <div className="bg-white border rounded-2xl shadow-sm p-5 md:p-7 p-[4px] bg-gradient-to-br from-pink-100 to-pink-300">
+        <div className="bg-white border rounded-2xl shadow-sm p-5 md:p-7 bg-gradient-to-br from-pink-100 to-pink-300">
           {/* TOP SECTION: Avatar + Basic Info + Hire button */}
           <div className="flex flex-col md:flex-row md:items-start gap-6">
             {/* Avatar + ring */}
@@ -299,6 +325,28 @@ const ProfilePage = () => {
                       <span className="font-semibold">DOB:</span> {basic.dob ?? "—"} {age !== null ? <span>• {age} yr{age > 1 ? "s" : ""}</span> : null}
                     </p>
                   </div>
+
+                  {/* Display saved links */}
+                  {basic.links && basic.links.length > 0 && (
+                    <div className="mt-3">
+                      <p className="font-semibold text-gray-900 mb-2">Social Links:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {basic.links.map((link) => (
+  <a
+    key={link.platform}
+    href={link.url}
+    target="_blank"
+    rel="noreferrer"
+    className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-xs font-medium transition"
+  >
+    <span>{link.platform}</span>
+    <span className="text-gray-400">↗</span>
+  </a>
+))}
+
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Quick meta info */}
@@ -340,16 +388,15 @@ const ProfilePage = () => {
                   </div>
                 </div>
 
-                {/* Tags — show willingness/travel */}
+                {/* Add Links Button */}
                 <div className="flex flex-wrap gap-2 text-[11px]">
-  <button
-    onClick={() => setIsLinkModalOpen(true)}
-    className="px-3 py-1 rounded-full bg-white text-white font-medium hover:bg-gray-900 transition"
-  >
-    Add Links
-  </button>
-
-</div>
+                  <button
+                    onClick={() => setIsLinkModalOpen(true)}
+                    className="px-3 py-1 rounded-full bg-white text-white font-medium hover:bg-gray-800 transition"
+                  >
+                    {basic.links && basic.links.length > 0 ? "Edit Links" : "Add Links"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -398,7 +445,6 @@ const ProfilePage = () => {
           {activeTab === "acchivements" && <Acchivements profile={profile} />}
         </div>
       </div>
-
 
       {/* Link modal */}
       <LinkModal
