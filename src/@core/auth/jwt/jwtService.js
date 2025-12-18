@@ -4,8 +4,8 @@ import jwtDefaultConfig from './jwtDefaultConfig'
 
 // PRODUCTION GCP Configuration - PORT 8080 add kiya gaya hai
 // axios.defaults.baseURL = 'http://192.168.29.35:8000/'
-// axios.defaults.baseURL = 'https://locktrust.xyz/drakeapi'
-axios.defaults.baseURL = 'http://192.168.29.210:8000'
+axios.defaults.baseURL = 'https://locktrust.xyz/drakeapi'
+// axios.defaults.baseURL = 'http://192.168.29.210:8000'
 
 
 // axios.defaults.baseURL = 'http://34.71.120.171:8080/'
