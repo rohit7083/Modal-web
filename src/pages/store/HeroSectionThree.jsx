@@ -40,7 +40,7 @@ const TestimonialSlider = () => {
   const active = testimonials[index];
 
   return (
-    <section className="w-full bg-white px-4 overflow-hidden pb-20">
+    <section className="w-full bg-white px-4 overflow-hidden">
       <div className="max-w-5xl mx-auto min-h-[420px] flex flex-col justify-between">
         <AnimatePresence mode="wait">
           <motion.div

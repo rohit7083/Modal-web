@@ -10,6 +10,7 @@
   import UserProfile from "../pages/Profile/user_profile"
   import PerdonalProfile from "../pages/Profile/temp" 
   import Store from "../pages/store/index"
+  import JobsPage from "../pages/jobs/index"
 
   const NotFound = () => <div>404 - Page not found</div>
 
@@ -32,8 +33,9 @@
             <Route path="/user_profile" element={<UserProfile />} />
             <Route path='/personal-Profile' element={<PerdonalProfile />} />
             <Route path='/store' element={<Store />} />
+            <Route path='/jobs' element={<JobsPage />} />
 
-            {/* 404 */}
+          
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
