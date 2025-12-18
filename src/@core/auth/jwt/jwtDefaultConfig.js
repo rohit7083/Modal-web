@@ -23,10 +23,16 @@ export default {
 *profile endpoint 
 */
 addMediaToProfileEndpoint : 'model/images/videos',
-getProfileMedia : '/model/images/video',
 getProfileInfoEndPoint : '/model/info',
 uploadVideoToProfileEndpoint: "/model/video", 
 addLinksToProfileEndpoint : '/model/social/links',
+
+
+/* 
+* Modal Public Section 
+*/
+getAllPublicModalEndpoint: '/public/models',
+getPublicModalByuid : '/public/models/details/{uuid}'
 
   
 }

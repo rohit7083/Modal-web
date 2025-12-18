@@ -13,6 +13,7 @@ function Post() {
   // ==================== FETCH POSTS ====================
   const fetchPosts = async () => {
     try {
+      debugger
       const res = await useJwt.getMediaToProfile();
       const data = res?.data;
       const normalized = Array.isArray(data) ? data : data ? [data] : [];

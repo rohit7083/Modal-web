@@ -202,6 +202,9 @@ export default class JwtService {
   getMediaToProfile (){
     return axios.get(this.jwtConfig.addMediaToProfileEndpoint)
   }
+  getVideoForProfile(){
+    return axios.get(this.jwtConfig.uploadVideoToProfileEndpoint)
+  }
 
   getModalProfileModalInfo(){
     console.log("You are inside profile info")
@@ -237,6 +240,14 @@ export default class JwtService {
 
 getAllSocialMediaLinks(){
   return axios.get(this.jwtConfig.addLinksToProfileEndpoint)
+}
+
+getAllPuclicModal(){
+  return axios.get(this.jwtConfig.getAllPublicModalEndpoint)
+}
+getPublicModalByuid(uid) {
+  const url = this.jwtConfig.getPublicModalByuid.replace('{uuid}', uid);
+  return axios.get(url);
 }
 
 

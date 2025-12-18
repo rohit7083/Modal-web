@@ -8,24 +8,23 @@ function Post() {
   const [visibleCount, setVisibleCount] = useState(9);
   const [loading, setLoading] = useState(false);
 
-  // YouTube URL state (local, static; no API calls)
-  const [youtubeInput, setYoutubeInput] = useState(
-    // "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-    ""
-  );
+  // ✅ Subscription modal
+  const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
+
+  // YouTube (static)
+  const [youtubeInput, setYoutubeInput] = useState("");
   const [youtubeEmbedUrl, setYoutubeEmbedUrl] = useState(null);
 
-  // File input ref
   const fileInputRef = useRef(null);
 
   // ==================== FETCH POSTS ====================
   const fetchPosts = async () => {
     try {
-      const res = await useJwt.getMediaToProfile();
+      debugger
+      const res = await useJwt.getVideoForProfile();
       const data = res?.data;
       const normalized = Array.isArray(data) ? data : data ? [data] : [];
       setPosts(normalized);
-      console.log("Fetched posts:", normalized);
     } catch (err) {
       console.error("Error fetching posts:", err);
     }
@@ -35,18 +34,16 @@ function Post() {
     fetchPosts();
   }, []);
 
-  // ==================== HANDLE FILE UPLOAD ====================
+  // ==================== FILE UPLOAD ====================
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Must be video
     if (!file.type.startsWith("video/")) {
       alert("Please select a video file.");
       return;
     }
 
-    // Max 200MB frontend validation (backend will enforce 10MB)
     const MAX_BYTES = 200 * 1024 * 1024;
     if (file.size > MAX_BYTES) {
       alert("File too large. Maximum allowed size is 200MB.");
@@ -57,19 +54,26 @@ function Post() {
 
     try {
       const formData = new FormData();
-      // IMPORTANT ⬇⬇ (backend expects "video")
       formData.append("video", file);
 
       const res = await useJwt.uploadVideo(formData);
 
       if (!res || (res.status !== 200 && res.status !== 201)) {
-        throw new Error(res?.data?.detail || "Upload failed");
+        throw new Error("Upload failed");
       }
 
       await fetchPosts();
     } catch (err) {
       console.error("Upload error:", err);
-      alert("Upload failed: " + (err?.message || ""));
+
+      // ✅ VIDEO LIMIT ERROR → OPEN SUBSCRIPTION MODAL
+      if (
+        err?.response?.status === 403 &&
+        err?.response?.data?.detail ===
+          "You already have a video. Take subscription for more videos."
+      ) {
+        setIsLimitModalOpen(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -78,7 +82,7 @@ function Post() {
   // ==================== OPEN FILE PICKER ====================
   const openFilePicker = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""; // reset
+      fileInputRef.current.value = "";
       fileInputRef.current.click();
     }
   };
@@ -88,24 +92,14 @@ function Post() {
   };
 
   // ==================== YOUTUBE HELPERS ====================
-  // Return embed URL or null
   const getYoutubeEmbedFromUrl = (url) => {
-    if (!url || typeof url !== "string") return null;
-    // standard watch?v=...
-    const ytWatchMatch = url.match(/[?&]v=([^&]+)/);
-    if (ytWatchMatch && ytWatchMatch[1]) {
-      return `https://www.youtube.com/embed/${ytWatchMatch[1]}`;
-    }
-    // youtu.be/ID
-    const shortMatch = url.match(/youtu\.be\/([^?&/]+)/);
-    if (shortMatch && shortMatch[1]) {
-      return `https://www.youtube.com/embed/${shortMatch[1]}`;
-    }
-    // embed url already
-    const embedMatch = url.match(/youtube\.com\/embed\/([^?&/]+)/);
-    if (embedMatch && embedMatch[1]) {
-      return `https://www.youtube.com/embed/${embedMatch[1]}`;
-    }
+    if (!url) return null;
+    const watch = url.match(/[?&]v=([^&]+)/);
+    if (watch) return `https://www.youtube.com/embed/${watch[1]}`;
+    const short = url.match(/youtu\.be\/([^?&/]+)/);
+    if (short) return `https://www.youtube.com/embed/${short[1]}`;
+    const embed = url.match(/youtube\.com\/embed\/([^?&/]+)/);
+    if (embed) return `https://www.youtube.com/embed/${embed[1]}`;
     return null;
   };
 
@@ -116,18 +110,12 @@ function Post() {
       return;
     }
     setYoutubeEmbedUrl(embed);
-    // scroll to player (optional)
-    setTimeout(() => {
-      const el = document.getElementById("youtube-embed-player");
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 100);
   };
 
-  // If a post.video is a YouTube URL, prefer embed for that post
   const isYoutubeUrl = (url) => !!getYoutubeEmbedFromUrl(url);
 
   return (
-    <div className="p-3">
+    <div className="p-3 relative">
       {/* Hidden File Input */}
       <input
         type="file"
@@ -137,16 +125,15 @@ function Post() {
         onChange={handleFileChange}
       />
 
-      {/* YouTube input area (static/local; does not call API) */}
+      {/* YouTube input */}
       <div className="mb-6 p-4 rounded-lg bg-white shadow-sm">
         <label className="block mb-2 font-medium">Play YouTube (static)</label>
         <div className="flex gap-2">
           <input
-            type="text"
             className="flex-1 rounded-md border px-3 py-2"
             value={youtubeInput}
             onChange={(e) => setYoutubeInput(e.target.value)}
-            placeholder="Paste YouTube URL (e.g. https://www.youtube.com/watch?v=...)"
+            placeholder="Paste YouTube URL"
           />
           <button
             onClick={handlePlayYoutubeInput}
@@ -154,26 +141,16 @@ function Post() {
           >
             Play
           </button>
-          <button
-            onClick={() => {
-              setYoutubeInput("");
-              setYoutubeEmbedUrl(null);
-            }}
-            className="px-3 py-2 rounded-md border"
-          >
-            Clear
-          </button>
         </div>
-        {/* Embedded player for the input URL */}
+
         {youtubeEmbedUrl && (
-          <div id="youtube-embed-player" className="mt-4 rounded overflow-hidden shadow">
+          <div className="mt-4 rounded overflow-hidden shadow">
             <div className="relative pb-[56.25%]">
               <iframe
-                title="YouTube Player"
                 src={youtubeEmbedUrl}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                title="YouTube Player"
                 allowFullScreen
-                className="absolute top-0 left-0 w-full h-full"
+                className="absolute inset-0 w-full h-full"
               />
             </div>
           </div>
@@ -183,87 +160,85 @@ function Post() {
       {/* Video List */}
       <div className="space-y-6">
         {posts.slice(0, visibleCount).map((post, i) => {
-          // If post.video is falsy, skip
-          if (!post || (!post.video && !post.youtubeLink)) return null;
+          if (!post?.video && !post?.youtubeLink) return null;
+          const url = post.youtubeLink ?? post.video;
+          const embed = isYoutubeUrl(url);
 
-          const candidateUrl = post.youtubeLink ?? post.video;
-          const embed = isYoutubeUrl(candidateUrl);
-
-          // If embed available, show iframe
-          if (embed) {
-            return (
-              <div
-                key={post.id ?? i}
-                className="rounded-xl overflow-hidden shadow-xl hover:-rotate-1 hover:scale-[1.02] transition-all duration-300"
-              >
-                <div className="relative pb-[56.25%]">
-                  <iframe
-                    title={`yt-${post.id ?? i}`}
-                    src={getYoutubeEmbedFromUrl(candidateUrl)}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="absolute top-0 left-0 w-full h-full bg-black"
-                  />
-                </div>
+          return embed ? (
+            <div key={i} className="rounded-xl overflow-hidden shadow-xl">
+              <div className="relative pb-[56.25%]">
+                <iframe
+                  src={getYoutubeEmbedFromUrl(url)}
+                  title={`yt-${i}`}
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                />
               </div>
-            );
-          }
-          // Otherwise show regular video tag (hosted video)
-          return (
-            <div
-              key={post.id ?? i}
-              className="rounded-xl overflow-hidden shadow-xl hover:-rotate-1 hover:scale-[1.02] transition-all duration-300"
-            >
+            </div>
+          ) : (
+            <div key={i} className="rounded-xl overflow-hidden shadow-xl">
               <video
                 src={post.video}
                 controls
-                className="w-full h-auto max-h-[500px] object-contain bg-black"
+                className="w-full bg-black"
               />
             </div>
           );
         })}
       </div>
 
-      {/* View More */}
-      {visibleCount < posts.length && (
-        <div className="mt-6 flex justify-center">
-          <button
-            onClick={handleViewMore}
-            className="
-              px-6 py-2.5 rounded-full
-              border border-pink-500
-              text-pink-500 font-semibold text-sm
-              hover:bg-pink-500 hover:text-white
-              transition duration-300 active:scale-95
-              shadow-sm
-            "
-          >
-            View more
-          </button>
-        </div>
-      )}
-
-      {/* Plus Upload Button */}
+      {/* Upload Button */}
       <div className="rounded-xl overflow-hidden shadow-xl my-4">
         <button
-          type="button"
           onClick={openFilePicker}
-          className="
-            w-full h-full min-h-[100px]
-            flex flex-col items-center justify-center
-            bg-gray-100 hover:bg-gray-200
-            transition-all duration-300
-          ">
+          className="w-full min-h-[100px] flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200"
+        >
           {loading ? (
-            <span className="text-gray-600 text-sm">Uploading...</span>
+            <span className="text-gray-600">Uploading...</span>
           ) : (
             <>
               <span className="text-5xl font-bold">+</span>
-              <span className="mt-2 text-sm text-gray-600">Add new Video</span>
+              <span className="mt-2 text-sm text-gray-600">
+                Add new Video
+              </span>
             </>
           )}
         </button>
       </div>
+
+      {/* ==================== SUBSCRIPTION MODAL ==================== */}
+      {isLimitModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <h2 className="text-xl font-bold mb-2">
+              Video upload limit reached 🚫
+            </h2>
+
+            <p className="text-gray-600 text-sm mb-4">
+              Your current subscription allows only{" "}
+              <span className="font-semibold">1 video upload</span>.
+              <br />
+              Upgrade your plan to upload more videos.
+            </p>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setIsLimitModalOpen(false)}
+                className="flex-1 px-4 py-2 rounded-lg border"
+              >
+                Maybe later
+              </button>
+
+              <button
+                onClick={() => setIsLimitModalOpen(false)}
+                className="flex-1 px-4 py-2 rounded-lg bg-pink-500 text-white font-semibold"
+              >
+                Upgrade plan 🚀
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -113,61 +113,7 @@ const NavbarRJ = () => {
                   </Link>
                 </li>
 
-                {/* Models Dropdown */}
-                <li className="relative">
-                  <button
-                    type="button"
-                    onClick={() => toggleDropdown("models")}
-                    className="w-full lg:w-auto flex items-center text-[0.85rem] font-medium tracking-[0.12em] uppercase px-[0.9rem] py-2 cursor-pointer !bg-transparent !border-none text-black hover:text-primary"
-                  >
-                    MODELS
-                    <svg
-                      className="w-3 h-3 ml-1 inline-block"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </button>
-
-                  {openDropdown === "models" && (
-                    <ul className="lg:absolute lg:top-full lg:left-0 bg-white lg:shadow-lg lg:rounded lg:min-w-[160px] lg:mt-1 pl-4 lg:pl-0 list-none m-0 p-0 lg:border lg:border-gray-200">
-                      <li>
-                        <Link
-                          className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
-                          to="/modals/men"
-                          onClick={handleNavItemClick}
-                        >
-                          Male Models
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
-                          to="/modals/women"
-                          onClick={handleNavItemClick}
-                        >
-                          Female Models
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          className="block px-4 py-2 text-sm text-black hover:text-primary hover:bg-[#f5f5f5] no-underline"
-                          to="/modals/kids"
-                          onClick={handleNavItemClick}
-                        >
-                          Kids
-                        </Link>
-                      </li>
-                    </ul>
-                  )}
-                </li>
+               
 
                 {/* About Us */}
                 <li>
@@ -179,6 +125,19 @@ const NavbarRJ = () => {
                     About Us
                   </Link>
                 </li>
+
+                {/* About Us */}
+                <li>
+                  <Link
+                    to="/modals"
+                    onClick={handleNavItemClick}
+                    className="block text-[0.85rem] font-medium tracking-[0.12em] uppercase px-[0.9rem] py-2 no-underline text-black hover:text-primary"
+                  >
+                  Modals
+                  </Link>
+                </li>
+
+
 
                 {/* Services Dropdown */}
                 <li className="relative">
