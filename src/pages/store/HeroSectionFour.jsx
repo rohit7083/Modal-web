@@ -7,7 +7,7 @@ function HeroSectionFour() {
       <img
         src={SellingImage}
         alt="advertisement"
-        className="w-full object-cover"
+        className="w-full object-cover "
       />
 
       <button

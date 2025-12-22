@@ -1,126 +1,109 @@
 import React from "react";
 
-export default function FeaturedJobs() {
+export default function JobCards({
+  searchText,
+  location,
+  jobType,
+  salaryRange,
+}) {
   const jobs = [
     {
-      title: "Runway Fashion Model",
-      type: "PART-TIME",
-      salary: "$300 – $550 / Show",
-      company: "Elite Model Agency",
-      location: "New York, USA",
-      applicants: "25+ applicants",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/4/4d/Elite_Model_Management_logo.svg",
+      company: "Elite Models",
+      title: "Runway Model",
+      experience: "0 – 3 Years",
+      level: "Mid Level",
+      logo: "https://cdn-icons-png.flaticon.com/512/3663/3663782.png",
     },
     {
-      title: "Print / Magazine Model",
-      type: "FULL-TIME",
-      salary: "$4,000 – $7,500 / Month",
-      company: "Vogue Talent House",
-      location: "Los Angeles, USA",
-      applicants: "15+ applicants",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Vogue_logo.svg/2560px-Vogue_logo.svg.png",
+      company: "Bollywood Casting",
+      title: "Film Actor",
+      experience: "0 – 5 Years",
+      level: "Senior Level",
+      logo: "https://cdn-icons-png.flaticon.com/512/1077/1077012.png",
     },
     {
-      title: "Commercial Advertisement Model",
-      type: "PART-TIME",
-      salary: "$500 – $1200 / Project",
-      company: "Global Model Casting",
-      location: "Miami, USA",
-      applicants: "30+ applicants",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/9/96/Star_symbol.svg",
+      company: "Fashion Studio",
+      title: "Fashion Model",
+      experience: "0 – 2 Years",
+      level: "Entry Level",
+      logo: "https://cdn-icons-png.flaticon.com/512/2413/2413178.png",
     },
     {
-      title: "Portfolio Shoot Model",
-      type: "FULL-TIME",
-      salary: "$3,000 – $6,500 / Month",
-      company: "Lens Art Studios",
-      location: "Chicago, USA",
-      applicants: "10+ applicants",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/9/96/Star_symbol.svg",
+      company: "Ad Agency",
+      title: "TV Commercial Actor",
+      experience: "Min 1 Year",
+      level: "Mid Level",
+      logo: "https://cdn-icons-png.flaticon.com/512/3531/3531833.png",
     },
     {
-      title: "Fashion Show Model",
-      type: "FULL-TIME",
-      salary: "$5,000 – $9,500 / Month",
-      company: "Fashion Walk America",
-      location: "Houston, USA",
-      applicants: "12+ applicants",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/9/96/Star_symbol.svg",
+      company: "OTT Media",
+      title: "Web Series Actor",
+      experience: "0 – 4 Years",
+      level: "Mid Level",
+      logo: "https://cdn-icons-png.flaticon.com/512/1041/1041916.png",
     },
     {
-      title: "Jewelry Advertisement Model",
-      type: "PART-TIME",
-      salary: "$400 – $900 / Shoot",
-      company: "Diamond Vogue Agency",
-      location: "New York, USA",
-      applicants: "20+ applicants",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/9/96/Star_symbol.svg",
+      company: "Print Production House",
+      title: "Magazine Model",
+      experience: "0 – 3 Years",
+      level: "Entry Level",
+      logo: "https://cdn-icons-png.flaticon.com/512/3218/3218543.png",
+    },
+    {
+      company: "Music Video Studio",
+      title: "Music Video Actor",
+      experience: "0 – 1 Year",
+      level: "Junior Level",
+      logo: "https://cdn-icons-png.flaticon.com/512/1995/1995390.png",
+    },
+    {
+      company: "Reality Show Team",
+      title: "Reality Show Performer",
+      experience: "Min 1 Year",
+      level: "Mid Level",
+      logo: "https://cdn-icons-png.flaticon.com/512/2430/2430286.png",
     },
   ];
 
+  const filtered = jobs.filter((job) => {
+    const matchSearch =
+      searchText === "" ||
+      job.title.toLowerCase().includes(searchText.toLowerCase()) ||
+      job.company.toLowerCase().includes(searchText.toLowerCase());
+
+    const matchJobType =
+      jobType === "" ||
+      job.level.toLowerCase().includes(jobType.toLowerCase());
+
+    return matchSearch && matchJobType;
+  });
+
   return (
-    <div className="text-center py-12">
-
-      <h2 className="text-3xl md:text-4xl font-serif tracking-[0.35em] text-primary uppercase text-center mb-10">
-        Featured Jobs
-      </h2>
-
-      <p className="text-gray-500 mb-10">
-        Choose jobs from top modeling agencies and apply now.
-      </p>
-
-      <div className="grid md:grid-cols-3 gap-6 px-4 max-w-6xl mx-auto">
-        {jobs.map((job, i) => (
-          <div
-            key={i}
-            className="
-              rounded-xl 
-              px-6 py-6 
-              text-left 
-              shadow-sm 
-              hover:shadow-md 
-              transition 
-              bg-gradient-to-b 
-              from-pink-200 
-              to-white
-              border
-            "
-          >
-            <h3 className="text-lg font-semibold mb-1">{job.title}</h3>
-
-            <p className="text-sm mb-4">
-              <span className="text-green-600 font-semibold">
-                {job.type}
-              </span>{" "}
-              <span className="text-gray-500">
-                Salary: {job.salary}
-              </span>
-            </p>
-
-            <div className="flex items-center gap-3 mb-4">
-              <img src={job.logo} alt="" className="w-7 h-7 rounded-full" />
-              <div>
-                <p className="font-medium text-gray-800">{job.company}</p>
-                <p className="text-sm text-gray-500 flex items-center gap-1">
-                  📍 {job.location}
-                </p>
-              </div>
-            </div>
-
-            <p className="text-sm text-gray-500 mb-6">{job.applicants}</p>
-
-            <div className="flex items-center justify-between gap-3">
-              <button className="border px-4 py-2 rounded-lg w-1/2 hover:bg-gray-100 text-sm font-medium">
-                View details
-              </button>
-              <button className="border px-4 py-2 rounded-lg w-1/2 hover:bg-gray-100 text-sm font-medium">
-                Apply Now
-              </button>
-            </div>
+    <div className="grid grid-cols-4 gap-6 m-6">
+      {filtered.map((job, index) => (
+        <div
+          key={index}
+          className="
+            rounded-3xl p-6 cursor-pointer duration-200 hover:shadow-xl 
+            bg-gradient-to-r from-white via-primary/10 to-white shadow-md
+          "
+        >
+          <img src={job.logo} className="w-12 h-12 mb-3 mx-auto" />
+          <h2 className="font-bold text-gray-900 text-lg text-center whitespace-nowrap">
+            {job.title}
+          </h2>
+          <p className="text-gray-500 text-sm mt-1 mb-4 text-center leading-relaxed">
+            Work with leading studios, fashion brands and casting companies.
+          </p>
+          <div className="flex justify-between text-gray-500 text-sm">
+            <span className="whitespace-nowrap">{job.company}</span>
+            <span className="whitespace-nowrap">{job.experience}</span>
           </div>
-        ))}
-      </div>
-
+          <p className="text-primary mt-3 font-semibold text-sm whitespace-nowrap">
+            {job.level}
+          </p>
+        </div>
+      ))}
     </div>
   );
 }

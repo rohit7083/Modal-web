@@ -32,7 +32,17 @@ addLinksToProfileEndpoint : '/model/social/links',
 * Modal Public Section 
 */
 getAllPublicModalEndpoint: '/public/models',
-getPublicModalByuid : '/public/models/details/{uuid}'
+getPublicModalByuid : '/public/models/details/{uuid}',
 
-  
+
+/*
+* casting Company 
+*/
+completeCastingCompanyProfileEndpoint: '/agency/create',
+getJobsEndpoint : ''
+
+
+
+
+
 }
