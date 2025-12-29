@@ -187,7 +187,7 @@ function BasicInfoForm({ onSubmitSuccess }) {
       {/* Home City */}
       <div>
         <label className="text-sm font-medium mb-1 text-gray-700 block">
-          Home City
+          Home Town
         </label>
         <input
           type="text"

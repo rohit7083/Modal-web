@@ -1,5 +1,5 @@
   // src/pages/user_profile.jsx
-  import React, { useState } from "react";
+  import React, { useEffect, useState } from "react";
   import { useNavigate } from "react-router-dom";
 
   // ✅ Correct paths based on your files
@@ -7,6 +7,7 @@
   import PhysicalAttributesForm from "./../forms/PhysicalAttributes";
   import MediaUploadForm from "./../forms/PortfolioForm";
   import UpdateProfile from "./../forms/updateProfile"; 
+import useJwt from "../../../src/endpoints/jwt/useJwt";
 
   function UserProfile() {
     // Start from Step 1
@@ -65,6 +66,16 @@
       }
       window.location.href = "/";
     };
+
+
+    //status check 
+    useEffect(() => {
+    
+      const resonse = useJwt.getProfileStatusCheck();
+    
+      
+    }, [])
+    
 
     return (
       <div className="mt-10 mb-20 px-4 flex flex-col items-center">

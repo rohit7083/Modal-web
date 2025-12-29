@@ -132,7 +132,7 @@ const NavbarRJ = () => {
                     onClick={handleNavItemClick}
                     className="block text-[0.85rem] font-medium tracking-[0.12em] uppercase px-[0.9rem] py-2 no-underline text-black hover:text-primary"
                   >
-                    Modals
+                    Models
                   </Link>
                 </li>
 

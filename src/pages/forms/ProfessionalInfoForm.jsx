@@ -92,11 +92,11 @@ function ProfessionalInfoForm({ onSubmitSuccess }) {
   const [formData, setFormData] = useState({
     professional_experience: "",       // "yes" | "no"
     experience_details: "",
-    experience_level: "",
     languages: [],
     skills: [],
+    other_skills: [],
     interested_categories: [],
-    availability: [],
+    other_interested_categories: [],
     willing_to_travel: "",            // "yes" | "no"
   });
 
@@ -111,6 +111,14 @@ function ProfessionalInfoForm({ onSubmitSuccess }) {
       ...prev,
       [name]: value,
     }));
+
+    // Clear experience_details when professional_experience changes to "no"
+    if (name === "professional_experience" && value === "no") {
+      setFormData((prev) => ({
+        ...prev,
+        experience_details: "",
+      }));
+    }
 
     setErrors((prev) => ({
       ...prev,
@@ -139,11 +147,9 @@ function ProfessionalInfoForm({ onSubmitSuccess }) {
 
     // Required fields
     const requiredFields = [
-      "experience_level",
       "languages",
       "skills",
       "interested_categories",
-      "availability",
       "professional_experience",
       "willing_to_travel",
     ];
@@ -178,11 +184,12 @@ function ProfessionalInfoForm({ onSubmitSuccess }) {
     const payload = {
       professional_experience: formData.professional_experience === "yes",
       experience_details: formData.experience_details.trim(),
-      experience_level: formData.experience_level,
       languages: formData.languages,
+      other_languages: formData.other_languages,
       skills: formData.skills,
+      other_skills: formData.other_skills,
       interested_categories: formData.interested_categories,
-      availability: formData.availability,
+      other_interested_categories: formData.other_interested_categories,
       willing_to_travel: formData.willing_to_travel === "yes",
     };
 
@@ -263,52 +270,32 @@ function ProfessionalInfoForm({ onSubmitSuccess }) {
         )}
       </div>
 
-      {/* Experience Details (shown always, but required only if yes) */}
-      <div>
-        <label className="text-sm font-medium mb-1 text-gray-700 block">
-          Experience Details
-          <span className="text-xs text-gray-500 ml-1">
-            (brands, shoots, years of work)
-          </span>
-        </label>
-        <textarea
-          name="experience_details"
-          rows={3}
-          placeholder="Describe your professional work experience..."
-          value={formData.experience_details}
-          onChange={handleSimpleChange}
-          className="border border-gray-300 rounded-lg px-3 py-2 w-full resize-y bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm"
-        />
-        {errors.experience_details && (
-          <p className="mt-1 text-xs text-red-500">
-            {errors.experience_details}
-          </p>
-        )}
-      </div>
+      {/* Experience Details (shown only if professional_experience is "yes") */}
+      {formData.professional_experience === "yes" && (
+        <div>
+          <label className="text-sm font-medium mb-1 text-gray-700 block">
+            Experience Details
+            <span className="text-xs text-gray-500 ml-1">
+              (brands, shoots, years of work)
+            </span>
+          </label>
+          <textarea
+            name="experience_details"
+            rows={3}
+            placeholder="Describe your professional work experience..."
+            value={formData.experience_details}
+            onChange={handleSimpleChange}
+            className="border border-gray-300 rounded-lg px-3 py-2 w-full resize-y bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm"
+          />
+          {errors.experience_details && (
+            <p className="mt-1 text-xs text-red-500">
+              {errors.experience_details}
+            </p>
+          )}
+        </div>
+      )}
 
-      {/* Experience Level */}
-      <div>
-        <label className="text-sm font-medium mb-1 text-gray-700 block">
-          Experience Level
-        </label>
-        <select
-          name="experience_level"
-          value={formData.experience_level}
-          onChange={handleSimpleChange}
-          className="border border-gray-300 rounded-lg px-3 py-2 w-full bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-        >
-          <option value="">Select experience level</option>
-          <option value="Beginner">Beginner</option>
-          <option value="Intermediate">Intermediate</option>
-          <option value="Professional">Professional</option>
-          <option value="Expert">Expert</option>
-        </select>
-        {errors.experience_level && (
-          <p className="mt-1 text-xs text-red-500">{errors.experience_level}</p>
-        )}
-      </div>
-
-      {/* Tag Inputs */}
+      {/* Interested Categories */}
       <TagInput
         name="interested_categories"
         label="Interested Categories"
@@ -320,15 +307,29 @@ function ProfessionalInfoForm({ onSubmitSuccess }) {
       />
 
       <TagInput
+        name="other_interested_categories"
+        label="Other Interested Categories"
+        helperText="(type + Enter, optional)"
+        placeholder="Additional categories..."
+        values={formData.other_interested_categories}
+        onChange={handleTagChange}
+        error={errors.other_interested_categories}
+      />
+
+      {/* Languages */}
+      <TagInput
         name="languages"
         label="Languages"
         helperText="(type + Enter)"
-        placeholder="English, Hindi, Marathi..."
+        placeholder="English, Spanish, French..."
         values={formData.languages}
         onChange={handleTagChange}
         error={errors.languages}
       />
 
+    
+
+      {/* Skills */}
       <TagInput
         name="skills"
         label="Skills"
@@ -339,15 +340,7 @@ function ProfessionalInfoForm({ onSubmitSuccess }) {
         error={errors.skills}
       />
 
-      <TagInput
-        name="availability"
-        label="Availability"
-        helperText="(type + Enter)"
-        placeholder="Weekdays, Weekends, Evenings..."
-        values={formData.availability}
-        onChange={handleTagChange}
-        error={errors.availability}
-      />
+     
 
       {/* Willing to Travel */}
       <div>
@@ -382,8 +375,8 @@ function ProfessionalInfoForm({ onSubmitSuccess }) {
           <p className="mt-1 text-xs text-red-500">
             {errors.willing_to_travel}
           </p>
-       )}
-      </div>  
+        )}
+      </div>
 
       {/* Submit Button */}
       <button

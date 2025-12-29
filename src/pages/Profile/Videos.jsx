@@ -20,7 +20,6 @@ function Post() {
   // ==================== FETCH POSTS ====================
   const fetchPosts = async () => {
     try {
-      debugger
       const res = await useJwt.getVideoForProfile();
       const data = res?.data;
       const normalized = Array.isArray(data) ? data : data ? [data] : [];
@@ -54,7 +53,7 @@ function Post() {
 
     try {
       const formData = new FormData();
-      formData.append("video", file);
+      formData.append("file", file);
 
       const res = await useJwt.uploadVideo(formData);
 
@@ -66,11 +65,15 @@ function Post() {
     } catch (err) {
       console.error("Upload error:", err);
 
-      // ✅ VIDEO LIMIT ERROR → OPEN SUBSCRIPTION MODAL
+      const errorMsg = err?.response?.data?.detail;
+      const statusCode = err?.response?.status;
+
+      // ✅ VIDEO LIMIT / SUBSCRIPTION EXPIRED
       if (
-        err?.response?.status === 403 &&
-        err?.response?.data?.detail ===
-          "You already have a video. Take subscription for more videos."
+        statusCode === 403 ||
+        errorMsg ===
+          "You already have a video. Take subscription for more videos." ||
+        errorMsg === "Subscribe to add more videos"
       ) {
         setIsLimitModalOpen(true);
       }
@@ -127,7 +130,9 @@ function Post() {
 
       {/* YouTube input */}
       <div className="mb-6 p-4 rounded-lg bg-white shadow-sm">
-        <label className="block mb-2 font-medium">Play YouTube (static)</label>
+        <label className="block mb-2 font-medium">
+          Play YouTube (static)
+        </label>
         <div className="flex gap-2">
           <input
             className="flex-1 rounded-md border px-3 py-2"

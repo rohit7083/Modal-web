@@ -6,18 +6,16 @@ function Post() {
   const [visibleCount, setVisibleCount] = useState(9);
   const [loading, setLoading] = useState(false);
 
-  const [isLimitModalOpen, setIsLimitModalOpen] = useState(false); // ✅ NEW
+  const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
 
   const fileInputRef = useRef(null);
 
   // ==================== FETCH POSTS ====================
   const fetchPosts = async () => {
     try {
-      debugger
       const res = await useJwt.getMediaToProfile();
-      const data = res?.data;
-      const normalized = Array.isArray(data) ? data : data ? [data] : [];
-      setPosts(normalized);
+      const images = res?.data?.images ?? [];
+      setPosts(Array.isArray(images) ? images : []);
     } catch (err) {
       console.error(err);
     }
@@ -36,7 +34,7 @@ function Post() {
 
     try {
       const formData = new FormData();
-      formData.append("photos", file);
+      formData.append("file", file);
 
       const res = await useJwt.addMediaToProfile(formData);
 
@@ -48,8 +46,15 @@ function Post() {
     } catch (err) {
       console.error("Upload error:", err);
 
-      // ✅ IMAGE LIMIT ERROR → OPEN MODAL
-      if (err?.response?.data?.detail === "Only 5 images are allowed.") {
+      const errorMsg = err?.response?.data?.detail;
+      const statusCode = err?.response?.status;
+
+      // ✅ IMAGE LIMIT OR SUBSCRIPTION EXPIRED
+      if (
+        errorMsg === "Only 5 images are allowed." ||
+        errorMsg === "Subscribe to add more images" ||
+        statusCode === 403
+      ) {
         setIsLimitModalOpen(true);
       }
     } finally {
@@ -82,20 +87,15 @@ function Post() {
 
       {/* Masonry Grid */}
       <div className="columns-1 sm:columns-2 md:columns-3 gap-6 space-y-6">
-        {posts.slice(0, visibleCount).map((post, i) => {
-          if (!Array.isArray(post.photos) || post.photos.length === 0)
-            return null;
-
-          return post.photos.map((imgUrl, idx) => (
-            <div
-              key={`${post.id ?? i}-${idx}`}
-              className="break-inside-avoid rounded-xl overflow-hidden shadow-xl
+        {posts.slice(0, visibleCount).map((img, i) => (
+          <div
+            key={img.index ?? i}
+            className="break-inside-avoid rounded-xl overflow-hidden shadow-xl
                          hover:-rotate-1 hover:scale-[1.04] transition-all duration-300"
-            >
-              <img src={imgUrl} alt="" className="w-full" />
-            </div>
-          ));
-        })}
+          >
+            <img src={img.url} alt="" className="w-full" />
+          </div>
+        ))}
       </div>
 
       {/* View More */}
@@ -158,10 +158,7 @@ function Post() {
               </button>
 
               <button
-                onClick={() => {
-                  setIsLimitModalOpen(false);
-                  // 👉 future: navigate to /subscription
-                }}
+                onClick={() => setIsLimitModalOpen(false)}
                 className="flex-1 px-4 py-2 rounded-lg bg-pink-500
                            text-white font-semibold hover:bg-pink-600"
               >

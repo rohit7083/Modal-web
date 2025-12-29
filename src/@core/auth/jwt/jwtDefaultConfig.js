@@ -22,8 +22,10 @@ export default {
 /*
 *profile endpoint 
 */
-addMediaToProfileEndpoint : 'model/images/videos',
+profileCompletionCheckEndpoint: '/model/user/profile/progress',
+addMediaToProfileEndpoint : '/model/images',
 getProfileInfoEndPoint : '/model/info',
+
 uploadVideoToProfileEndpoint: "/model/video", 
 addLinksToProfileEndpoint : '/model/social/links',
 
